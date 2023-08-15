@@ -1,0 +1,22 @@
+#!/bin/bash -eu
+#
+# Install tryboot files
+#
+
+dest_dir=${1:-}
+
+bin_dir="${dest_dir}"/usr/bin
+tb_dir="${dest_dir}"/usr/lib/rpi-tryboot
+
+mkdir -p "${bin_dir}" "${tb_dir}"/tryboot
+
+# Install firmware files
+cp buildd/initrd.img "${tb_dir}"/tryboot
+cp -r firmware/boot/firmware/* "${tb_dir}"/tryboot
+find "${tb_dir}"/tryboot -type f -exec chmod 644 {} +
+
+# Install config.txt snippets
+cp tryboot/* "${tb_dir}"
+
+# Install scripts
+cp bin/tryboot-* "${bin_dir}"

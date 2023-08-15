@@ -1,0 +1,101 @@
+#!/bin/bash -eu
+#
+# Mount a preinstalled raspi image
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+function mount_part()
+{
+	local start=${1} sectors=${2} image=${3} mountp=${4}
+	local offset sizelimit
+
+	offset=$((start * 512))
+	sizelimit=$((sectors * 512))
+
+	mount -o loop,ro,offset="${offset}",sizelimit="${sizelimit}" \
+	     "${image}" "${mountp}"
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] IMAGE MOUNTPOINT
+
+Mount an Ubuntu preinstalled raspi image.
+
+Positional arguments:
+  IMAGE       Image file.
+  MOUNTPOINT  Directory to mount the image at.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+image=
+mountp=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*) if [ -z "${image}" ] ; then
+			   image=$(realpath "${1}")
+		   elif [ -z "${mountp}" ] ; then
+			   mountp=$(realpath "${1}")
+		   else
+			   echo "Invalid argument: ${1}" >&2
+			   exit 2
+		   fi
+		   ;;
+	esac
+	shift
+done
+
+if [ -z "${image}" ] || [ -z "${mountp}" ] ; then
+	usage
+	exit 2
+fi
+
+if ! [ -e "${image}" ] ; then
+	echo "Image not found: ${image}" >&2
+	exit 1
+fi
+
+if ! [ -d "${mountp}" ] ; then
+	echo "Mount point not found: ${mountp}" >&2
+	exit 1
+fi
+
+trap out EXIT INT TERM HUP
+
+readarray -t parts < <(partx -o START,SECTORS -g "${image}" | \
+                       sed 's/^ *//;s/ *$//')
+bootp=${parts[0]}
+rootp=${parts[1]}
+
+# Mount the root parrition
+echo "-- Mount root partition at ${mountp}"
+mount_part "${rootp% *}" "${rootp#* }" "${image}" "${mountp}"
+
+# Mount the boot partition
+bootmountp=${mountp%/}/boot/firmware
+echo "-- Mount boot partition at ${bootmountp}"
+if ! mount_part "${bootp% *}" "${bootp#* }" "${image}" "${bootmountp}" ; then
+	umount "${mountp}"
+	exit 1
+fi
+
+echo "Image mounted"

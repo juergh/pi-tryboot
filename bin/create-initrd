@@ -1,0 +1,80 @@
+#!/bin/bash -eu
+#
+# Create the tryboot initrd
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h]
+
+Create the tryboot initrd image.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
+	esac
+	# shellcheck disable=SC2317
+	shift
+done
+
+trap out EXIT INT TERM HUP
+
+buildd=buildd
+
+initrdd=${buildd}/initrdd
+initrd=${buildd}/initrd.img
+
+rm -rf "${initrdd}"
+mkdir -p "${initrdd}"
+
+echo "-- Copy files to ${initrdd}"
+
+# Copy the init script
+cp bin/init "${initrdd}"
+
+# Copy config files
+mkdir -p "${initrdd}"/conf
+cp conf/* "${initrdd}"/conf
+
+# Copy the firmware
+rsync --verbose --archive --ignore-existing --exclude '/boot/' \
+      firmware/ "${initrdd}"
+
+# Create the busybox sh link for bin/init
+ln "${initrdd}"/bin/busybox "${initrdd}"/bin/sh
+
+# Fix timestamps for reproducible builds
+find "${initrdd}" -exec touch -h -d "1970-01-01 00:00:00 GMT" {} +
+
+echo "-- Create ${initrd}"
+outfile=$(realpath "${initrd}")
+(
+	cd "${initrdd}" && \
+	find . | sort | cpio --reproducible -H newc -o | gzip -9 > "${outfile}"
+)
+
+echo "Initrd: ${initrd}"

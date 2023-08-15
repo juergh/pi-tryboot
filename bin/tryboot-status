@@ -1,0 +1,9 @@
+#!/bin/bash -eu
+
+FW_DIR=/boot/firmware
+
+if grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt ; then
+	echo "-- Tryboot bootloader is enabled"
+else
+	echo "-- Tryboot bootloader is disabled"
+fi

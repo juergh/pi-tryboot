@@ -1,0 +1,70 @@
+#!/bin/bash -eu
+#
+# Download an Ubuntu preinstalled raspi server image
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h]
+
+Download and uncompress an Ubuntu preinstalled raspi server image.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
+	esac
+	# shellcheck disable=SC2317
+	shift
+done
+
+trap out EXIT INT TERM HUP
+
+series=jammy
+arch=armhf
+
+image_name=${series}-server-${arch}.img
+cached="${HOME}"/.cache
+
+image=${cached}/${image_name}
+
+
+# Remove the cached image if it's older than 7 days
+if [ -e "${image}" ] ; then
+	find "${image}" -type f -mtime +6 -delete
+fi
+
+base_url=http://cdimage.ubuntu.com/ubuntu-server/${series}/daily-preinstalled/current
+
+if ! [ -e "${image}" ] ; then
+	echo "-- Download image"
+	wget -O "${image}".xz \
+	     "${base_url}"/"${series}"-preinstalled-server-"${arch}"+raspi.img.xz
+	echo "-- Uncompress image"
+	unxz "${image}".xz
+fi
+
+echo "Image: ${image}"

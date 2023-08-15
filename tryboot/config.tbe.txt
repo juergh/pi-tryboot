@@ -1,0 +1,14 @@
+
+#
+# RPI-TRYBOOT
+#
+
+[all]
+enable_uart=1
+uart_2ndstage=1
+os_prefix=tryboot/${TRYBOOT_ENTRY}/
+overlay_prefix=tryboot/${TRYBOOT_ENTRY}/overlays/
+kernel=vmlinuz
+cmdline=cmdline.txt
+initramfs initrd.img followkernel
+arm_64bit=${ARM_64BIT}

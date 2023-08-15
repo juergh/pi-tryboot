@@ -1,0 +1,146 @@
+#!/bin/bash -eu
+#
+# Install a tryboot entry
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+init_tbe()
+{
+	# Initialize the tryboot entry (TBE) directory
+	rm -rf "${TBE_DIR}"
+	mkdir -p "${TBE_DIR}"
+}
+
+function install_tbe_tryboot()
+{
+	# Copy firmware files from the package
+	cp -r "${PKG_DIR}"/tryboot/* "${TBE_DIR}"
+}
+
+function install_tbe_flash_kernel()
+{
+	# Nothing to install
+	return
+}
+
+function install_tbe_kernel()
+{
+	local vmlinuz initrd
+
+	vmlinuz=${BOOT_DIR}/vmlinuz-${ENTRY}
+	initrd=${BOOT_DIR}/initrd.img-${ENTRY}
+
+	# Copy the kernel, initrd, DTBs and overlays
+	cp "${vmlinuz}" "${TBE_DIR}"/vmlinuz
+	cp "${initrd}" "${TBE_DIR}"/initrd.img
+	cp /lib/firmware/"${ENTRY}"/device-tree/broadcom/bcm27* "${TBE_DIR}"
+	cp -r /lib/firmware/"${ENTRY}"/device-tree/overlays "${TBE_DIR}"
+}
+
+config_tbe()
+{
+	# Create the main portion of the TBE config.txt
+	cp "${PKG_DIR}"/config.txt "${TBE_DIR}"
+
+	if [ "${ENTRY}" = "flash-kernel" ] ; then
+		return
+	fi
+
+	# Determine kernel architecture
+	if file "${TBE_DIR}"/vmlinuz | grep -q "zImage" ; then
+		arm_64bit=0
+	else
+		arm_64bit=1
+	fi
+
+	# Append the TBE portion to the TBE config.txt
+	TRYBOOT_ENTRY=${ENTRY} \
+	ARM_64BIT=${arm_64bit} \
+		envsubst < "${PKG_DIR}"/config.tbe.txt >> "${TBE_DIR}"/config.txt
+
+	# Create the TBE cmdline.txt
+	cp "${FW_DIR}"/cmdline.txt "${TBE_DIR}"
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] ENTRY
+
+Install (or update) a tryboot entry (TBE).
+
+Positional arguments:
+  ENTRY       TBE name. Must be a kernel version of an installed kernel or:
+                tryboot:      Install the main tryboot TBE. When selected, this
+                              entry boots into the tryboot boot menu.
+                flash-kernel: Install the flash-kernel TBE. When selected, this
+                              entry boots the 'original' kernel installed by
+                              flash-kernel.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+ENTRY=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			if [ -n "${ENTRY}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			ENTRY=${1}
+			;;
+	esac
+	shift
+done
+
+if [ -z "${ENTRY}" ] ; then
+	usage
+	exit 2
+fi
+
+PKG_DIR=/usr/lib/rpi-tryboot
+
+BOOT_DIR=/boot
+FW_DIR=/boot/firmware
+TB_DIR=/boot/firmware/tryboot
+
+case "${ENTRY}" in
+	tryboot|flash-kernel)
+		target=${ENTRY//-/_}
+		;;
+	*)
+		if ! [ -e /boot/vmlinuz-"${ENTRY}" ] ; then
+			echo "Invalid entry: ${ENTRY}" >&2
+			exit 1
+		fi
+		target=kernel
+		;;
+esac
+
+trap out EXIT INT TERM HUP
+
+TBE_DIR=${TB_DIR}/${ENTRY}
+
+init_tbe
+install_tbe_"${target}"
+config_tbe
+
+echo "-- Installed tryboot entry: ${ENTRY}"

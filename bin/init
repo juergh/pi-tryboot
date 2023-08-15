@@ -1,0 +1,106 @@
+#!/bin/sh
+
+# ----------------------------------------------------------------------------
+# Main entry point
+
+echo "-- Run tryboot init"
+
+# Initial setup
+/bin/busybox --install /bin
+
+[ -d /dev ] || mkdir -m 0755 /dev
+[ -d /root ] || mkdir -m 0700 /root
+[ -d /sys ] || mkdir /sys
+[ -d /proc ] || mkdir /proc
+[ -d /tmp ] || mkdir /tmp
+[ -d /boot ] || mkdir /boot
+mkdir -p /var/lock
+mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
+mount -t proc -o nodev,noexec,nosuid proc /proc
+
+mount -t devtmpfs -o nosuid,mode=0755 udev /dev
+mkdir /dev/pts
+mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts || true
+
+mkdir -p /etc /var/lib/dhcp /var/run
+touch /etc/fstab
+
+# Load kernel modules
+echo "-- Load kernel modules"
+depmod
+while read -r mod ; do
+	modprobe "${mod}"
+done < /conf/modules
+
+# Wait for the root device
+echo "-- Wait for /dev/mmcblk0p1 or /dev/sda1"
+for _ in $(seq 10) ; do
+	if [ -b /dev/mmcblk0p1 ] ; then
+		boot_dev=/dev/mmcblk0
+		boot_part=/dev/mmcblk0p1
+		break
+	elif [ -b /dev/sda1 ] ; then
+		boot_dev=/dev/sda
+		boot_part=/dev/sda1
+		break
+	fi
+	sleep .5
+done
+
+# Mount the boot partition
+mount "${boot_part}" /boot
+
+# Main loop
+tmp=$(mktemp)
+while true ; do
+	true > "${tmp}"
+
+	echo
+	echo
+	echo "------------------------------------------------------------"
+	echo "  Idx   Entry"
+	echo "------------------------------------------------------------"
+
+	idx=1
+	for tbe_dir in /boot/tryboot/* ; do
+		tbe=${tbe_dir##*/}
+		if [ "${tbe}" = "tryboot" ] || ! [ -e "${tbe_dir}"/config.txt ] ; then
+			continue
+		fi
+
+		printf "  %3d   %s\n" "${idx}" "${tbe}"
+		echo "${idx} ${tbe}" >> "${tmp}"
+		idx=$((idx + 1))
+	done
+
+	cat <<EOF
+
+  90   Run a shell
+EOF
+	echo "90 foo" >> "${tmp}"
+
+	echo "------------------------------------------------------------"
+	echo
+
+	printf "Choice: "
+	read -r idx
+	tbe=$(grep "^${idx} " "${tmp}")
+	tbe=${tbe#* }
+
+	if [ -z "${tbe}" ] ; then
+		continue
+	fi
+
+	case "${idx}" in
+		90)
+			/bin/sh
+			;;
+		*)
+			if cp /boot/tryboot/"${tbe}"/config.txt /boot/tryboot.txt ; then
+				sync
+				umount /boot
+				reboot -f "0 tryboot"
+			fi
+			;;
+	esac
+done

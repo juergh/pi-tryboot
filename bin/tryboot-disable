@@ -1,0 +1,12 @@
+#!/bin/bash -eu
+
+FW_DIR=/boot/firmware
+
+if ! grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt ; then
+	echo "-- Tryboot bootloader is already disabled"
+	exit
+fi
+
+cp "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
+
+echo "-- Tryboot bootloader disabled"

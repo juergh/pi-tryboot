@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+clean:
+	dh_testdir
+	dh_clean
+
+	rm -rf buildd
+
+build-indep:
+	bin/create-initrd
+
+install-indep:
+
+	dh_testdir
+	dh_testroot
+	dh_prep
+
+	# Install the tryboot files
+	bin/install debian/rpi-tryboot
+
+	dh_installchangelogs
+	dh_installdocs
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+
+binary-indep: install-indep
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+build: build-indep
+install: install-indep
+binary: binary-indep

@@ -1,0 +1,152 @@
+#!/bin/bash -eu
+#
+# Import 'firmware' from a preinstalled Ubuntu armhf raspi image
+#
+
+MULTIARCH=$(dpkg-architecture -a armhf -q DEB_HOST_MULTIARCH 2>/dev/null)
+READELF=$(dpkg-architecture -a armhf -q DEB_HOST_GNU_TYPE 2>/dev/null)-readelf
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+function find_so()
+{
+	local rootd=${1} bin=${2}
+	local line libd
+
+	echo "${bin}"
+
+	while IFS= read -r line ; do
+		so=${line%\]*}
+		so=${so##*\[}
+
+		for libd in /lib /lib/"${MULTIARCH}" ; do
+			bin=${libd}/${so}
+			if [ -e "${rootd}/${bin}" ] ; then
+				find_so "${rootd}" "${bin}"
+				break
+			fi
+		done
+	done < <("${READELF}" -d "${rootd}/${bin}" 2>/dev/null | \
+	         grep " Shared library: " || true)
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] MOUNTPOINT
+
+Import firmware binaries and libraries.
+
+Positional arguments:
+  MOUNTPOINT  Directory where an Ubuntu raspi preinstalled armhf server
+              image is mounted.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+rootd=
+
+while [ "${#}" -gt 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			if [ -n "${rootd}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			rootd=${1}
+			;;
+	esac
+	shift
+done
+
+if [ -z "${rootd}" ] ; then
+	usage
+	exit 2
+fi
+
+if [ -z "$(which "${READELF}")" ] ; then
+	echo "${READELF} not found" >&2
+	exit 1
+fi
+
+bootd="${rootd}"/boot/firmware
+if ! [ -e "${bootd}"/config.txt ] ; then
+	echo "File not found: ${bootd}/config.txt" >&2
+	exit 1
+fi
+
+trap out EXIT INT TERM HUP
+
+# Create directory tree
+rm -rf firmware
+mkdir -p firmware/boot/firmware/overlays
+mkdir -p firmware/usr/{bin,lib,sbin}
+ln -s usr/bin firmware/bin
+ln -s usr/lib firmware/lib
+ln -s usr/sbin firmware/sbin
+
+echo "-- Copy bootloader, kernel and DTBs"
+
+for f in "${bootd}"/{bootcode.bin,fixup.dat,fixup4.dat,start.elf,start4.elf,vmlinuz,bcm27*.dtb} ; do
+	echo "   - ${f#"${rootd}"}"
+	cp "${f}" firmware/boot/firmware/
+done
+
+echo "-- Copy overlays"
+
+for f in "${bootd}"/overlays/dwc* ; do
+	echo "   - ${f#"${rootd}"}"
+	cp "${f}" firmware/boot/firmware/overlays/
+done
+
+echo "-- Copy binaries and libraries"
+
+while read -r bin ; do
+	while IFS= read -r b ; do
+		if ! [ -e firmware/"${b}" ] ; then
+			echo "   - ${b}"
+			mkdir -p firmware/"${b%/*}"
+			cp "${rootd}/${b}" firmware/"${b}"
+		fi
+	done < <(find_so "${rootd}" "${bin}" | sort -u)
+done < conf/binaries
+
+for so in "${rootd}"/lib/klibc-*.so ; do
+	echo "   - ${so#"${rootd}"}"
+	cp "${so}" firmware/lib/
+done
+
+echo "-- Copy kernel modules"
+
+mods=()
+while read -r mod ; do
+	while IFS= read -r line ; do
+		m=${line##*/}
+		m=${m%:*}
+		mods+=("${m}")
+	done < <(grep "/${mod}.ko:" "${rootd}"/lib/modules/*/modules.dep | \
+	         tr -s " " | tr " " "\n")
+done < conf/modules
+
+for mod in "${mods[@]}" ; do
+	while IFS= read -r m ; do
+		echo "   - /${m}"
+		mkdir -p firmware/"${m%/*}"
+		cp "${rootd}/${m}" firmware/"${m}"
+	done < <(cd "${rootd}" && find lib/modules -type f -name "${mod}")
+done
