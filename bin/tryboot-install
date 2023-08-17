@@ -47,37 +47,12 @@ function install_tbe_kernel()
 	cp -r /lib/firmware/"${ENTRY}"/device-tree/overlays "${TBE_DIR}"
 }
 
-config_tbe()
-{
-	# Create the main portion of the TBE config.txt
-	cp "${PKG_DIR}"/config.txt "${TBE_DIR}"
-
-	if [ "${ENTRY}" = "flash-kernel" ] ; then
-		return
-	fi
-
-	# Determine kernel architecture
-	if file "${TBE_DIR}"/vmlinuz | grep -q "zImage" ; then
-		arm_64bit=0
-	else
-		arm_64bit=1
-	fi
-
-	# Append the TBE portion to the TBE config.txt
-	TRYBOOT_ENTRY=${ENTRY} \
-	ARM_64BIT=${arm_64bit} \
-		envsubst < "${PKG_DIR}"/config.tbe.txt >> "${TBE_DIR}"/config.txt
-
-	# Create the TBE cmdline.txt
-	cp "${FW_DIR}"/cmdline.txt "${TBE_DIR}"
-}
-
 function usage()
 {
 	cat <<EOF
 Usage: $(basename "${0}") [-h] ENTRY
 
-Install (or update) a tryboot entry (TBE).
+Install a tryboot entry (TBE).
 
 Positional arguments:
   ENTRY       TBE name. Must be a kernel version of an installed kernel or:
@@ -119,7 +94,6 @@ fi
 PKG_DIR=/usr/lib/rpi-tryboot
 
 BOOT_DIR=/boot
-FW_DIR=/boot/firmware
 TB_DIR=/boot/firmware/tryboot
 
 case "${ENTRY}" in
@@ -141,6 +115,8 @@ TBE_DIR=${TB_DIR}/${ENTRY}
 
 init_tbe
 install_tbe_"${target}"
-config_tbe
 
 echo "-- Installed tryboot entry: ${ENTRY}"
+
+# Update the TBE's config.txt and cmdline.txt
+tryboot-update "${ENTRY}"

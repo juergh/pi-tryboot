@@ -1,0 +1,115 @@
+#!/bin/bash -eu
+#
+# Update tryboot entries
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+function print_config()
+{
+	cat "${PKG_DIR}"/config.txt
+}
+
+function print_config_tbe()
+{
+	# Determine kernel architecture
+	if file "${TBE_DIR}"/vmlinuz | grep -q "zImage" ; then
+		arm_64bit=0
+	else
+		arm_64bit=1
+	fi
+
+	TRYBOOT_ENTRY=${ENTRY} \
+	ARM_64BIT=${arm_64bit} \
+		envsubst < "${PKG_DIR}"/config.tbe.txt
+}
+
+function update_tbe()
+{
+	echo "-- Update tryboot entry: ${ENTRY}"
+
+	# Generate the TBE's config.txt
+	case "${ENTRY}" in
+		tryboot)
+			print_config_tbe
+			;;
+		flash-kernel)
+			print_config
+			;;
+		*)
+			print_config
+			print_config_tbe
+			;;
+	esac > "${TBE_DIR}"/config.txt
+
+	# Generate the TBE's cmdline.txt
+	case "${ENTRY}" in
+		tryboot)
+			# FIXME
+			cp "${FW_DIR}"/cmdline.txt "${TBE_DIR}"
+			;;
+		flash-kernel)
+			# No cmdline.txt necessary
+			;;
+		*)
+			cp "${FW_DIR}"/cmdline.txt "${TBE_DIR}"
+			;;
+	esac
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] [ENTRY]
+
+Update tryboot entries (TBEs).
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+ENTRY=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			if [ -n "${ENTRY}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			ENTRY=${1}
+			;;
+	esac
+	shift
+done
+
+trap out EXIT INT TERM HUP
+
+PKG_DIR=/usr/lib/rpi-tryboot
+
+TB_DIR=/boot/firmware/tryboot
+
+if [ -n "${ENTRY}" ]  ; then
+	TBE_DIR="${TB_DIR}"/"${ENTRY}"
+	update_tbe
+else
+	for tbe_dir in "${TB_DIR}"/* ; do
+		ENTRY=${tbe_dir##*/}
+		TBE_DIR="${TB_DIR}"/"${ENTRY}"
+		update_tbe
+	done
+fi
