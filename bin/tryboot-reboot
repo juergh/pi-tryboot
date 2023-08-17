@@ -1,0 +1,51 @@
+#!/bin/bash -eu
+#
+# Reboot into a tryboot entry
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+}
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h]
+
+Reboot into a tryboot entry (TBE).
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
+	esac
+	# shellcheck disable=SC2317
+	shift
+done
+
+PKG_DIR=/usr/lib/rpi-tryboot
+
+trap out EXIT INT TERM HUP
+
+# shellcheck disable=SC1091
+. "${PKG_DIR}"/lib.sh
+
+tb_print_menu
