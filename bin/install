@@ -6,7 +6,6 @@
 dest_dir=${1:-}
 
 etc_dir="${dest_dir}"/etc
-etc_tb_dir="${dest_dir}"/etc/tryboot.d
 bin_dir="${dest_dir}"/usr/bin
 lib_tb_dir="${dest_dir}"/usr/lib/rpi-tryboot
 
@@ -20,10 +19,7 @@ find "${lib_tb_dir}"/tryboot -type f -exec chmod 644 {} +
 mkdir -p "${bin_dir}"
 cp bin/tryboot-* "${bin_dir}"
 
-# Install config snippets
-mkdir -p "${etc_tb_dir}"
-cp tryboot/* "${etc_tb_dir}"
-
 # Install config files
-mkdir -p "${etc_dir}"/default/tryboot.d
+mkdir -p "${etc_dir}"/default/tryboot.d "${etc_dir}"/tryboot.d
 cp etc/tryboot "${etc_dir}"/default/
+cp etc/tryboot.d/* "${etc_dir}"/tryboot.d/
