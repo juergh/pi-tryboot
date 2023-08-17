@@ -27,7 +27,7 @@ function install_tbe_tryboot()
 	cp -r "${PKG_DIR}"/tryboot/* "${TBE_DIR}"
 }
 
-function install_tbe_flash_kernel()
+function install_tbe_system_default()
 {
 	# Nothing to install
 	return
@@ -56,11 +56,11 @@ Install a tryboot entry (TBE).
 
 Positional arguments:
   ENTRY       TBE name. Must be a kernel version of an installed kernel or:
-                tryboot:      Install the main tryboot TBE. When selected, this
-                              entry boots into the tryboot boot menu.
-                flash-kernel: Install the flash-kernel TBE. When selected, this
-                              entry boots the 'original' kernel installed by
-                              flash-kernel.
+                tryboot:        Install the main tryboot TBE. When selected,
+                                this entry boots into the tryboot boot menu.
+                system-default: Install the system default TBE. When selected,
+                                this entry boots the 'original' kernel, i.e.,
+                                the system's default kernel.
 
 Optional arguments:
   -h, --help  Show this help text and exit.
@@ -97,7 +97,7 @@ BOOT_DIR=/boot
 TB_DIR=/boot/firmware/tryboot
 
 case "${ENTRY}" in
-	tryboot|flash-kernel)
+	tryboot|system-default)
 		target=${ENTRY//-/_}
 		;;
 	*)

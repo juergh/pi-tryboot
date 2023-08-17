@@ -42,7 +42,7 @@ function update_tbe()
 		tryboot)
 			print_config_tbe
 			;;
-		flash-kernel)
+		system-default)
 			print_config
 			;;
 		*)
@@ -64,7 +64,7 @@ function update_tbe()
 		tryboot)
 			echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${TBE_DIR}"/cmdline.txt
 			;;
-		flash-kernel)
+		system-default)
 			# No cmdline.txt necessary
 			;;
 		*)
