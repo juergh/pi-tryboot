@@ -51,17 +51,24 @@ function update_tbe()
 			;;
 	esac > "${TBE_DIR}"/config.txt
 
+	# Source tryboot defaults
+	while read -r v ; do unset "${v%%=*}" ; done < <(env | grep "^TRYBOOT_")
+	for cfg in /etc/default/tryboot /etc/default/tryboot.d/* ; do
+		if [ -e "${cfg}" ] ; then
+			. "${cfg}"
+		fi
+	done
+
 	# Generate the TBE's cmdline.txt
 	case "${ENTRY}" in
 		tryboot)
-			# FIXME
-			cp "${FW_DIR}"/cmdline.txt "${TBE_DIR}"
+			echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${TBE_DIR}"/cmdline.txt
 			;;
 		flash-kernel)
 			# No cmdline.txt necessary
 			;;
 		*)
-			cp "${FW_DIR}"/cmdline.txt "${TBE_DIR}"
+			echo "${TRYBOOT_CMDLINE_LINUX}" > "${TBE_DIR}"/cmdline.txt
 			;;
 	esac
 }

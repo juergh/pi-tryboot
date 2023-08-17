@@ -1,0 +1,7 @@
+# If you change this file, run 'tryboot-update' afterwards to update
+# /boot/firmware/tryboot/*/cmdline.txt
+
+TRYBOOT_CMDLINE_LINUX=
+
+# Special settings for the 'tryboot' TBE
+TRYBOOT_TRYBOOT_CMDLINE_LINUX=
