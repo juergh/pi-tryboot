@@ -16,7 +16,7 @@ function out()
 
 function print_config()
 {
-	cat "${PKG_DIR}"/config.txt
+	cat "${CFG_DIR}"/config.txt
 }
 
 function print_config_tbe()
@@ -30,7 +30,7 @@ function print_config_tbe()
 
 	TRYBOOT_ENTRY=${ENTRY} \
 	ARM_64BIT=${arm_64bit} \
-		envsubst < "${PKG_DIR}"/config.tbe.txt
+		envsubst < "${CFG_DIR}"/config.tbe.txt
 }
 
 function update_tbe()
@@ -106,7 +106,7 @@ done
 
 trap out EXIT INT TERM HUP
 
-PKG_DIR=/usr/lib/rpi-tryboot
+CFG_DIR=/etc/tryboot.d
 
 TB_DIR=/boot/firmware/tryboot
 
