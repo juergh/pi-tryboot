@@ -108,7 +108,14 @@ trap out EXIT INT TERM HUP
 
 CFG_DIR=/etc/tryboot.d
 
-TB_DIR=/boot/firmware/tryboot
+FW_DIR=/boot/firmware
+TB_DIR=${FW_DIR}/tryboot
+
+if grep -q "__CMDLINE__" /etc/default/tryboot ; then
+	# First time initialization
+	cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
+	sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
+fi
 
 if [ -n "${ENTRY}" ]  ; then
 	TBE_DIR="${TB_DIR}"/"${ENTRY}"
