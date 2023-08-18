@@ -44,8 +44,8 @@ if [ -n "${tbe}" ]  ; then
 		exit
 	fi
 	echo "-- No such tryboot entry: ${tbe}" >&2
-    tb_untrap_exit
-    exit 1
+	tb_untrap_exit
+	exit 1
 fi
 
 while read -r tbe ; do
