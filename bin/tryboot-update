@@ -3,66 +3,6 @@
 # Update tryboot entries
 #
 
-function print_config()
-{
-	cat "${CFG_DIR}"/config.txt
-}
-
-function print_config_tbe()
-{
-	# Determine kernel architecture
-	if file "${TBE_DIR}"/vmlinuz | grep -q "zImage" ; then
-		arm_64bit=0
-	else
-		arm_64bit=1
-	fi
-
-	TRYBOOT_ENTRY=${ENTRY} \
-	ARM_64BIT=${arm_64bit} \
-		envsubst < "${CFG_DIR}"/config.tbe.txt
-}
-
-function update_tbe()
-{
-	echo "-- Update tryboot entry: ${ENTRY}"
-
-	# Generate the TBE's config.txt
-	case "${ENTRY}" in
-		tryboot)
-			print_config_tbe
-			;;
-		system-default)
-			print_config
-			;;
-		*)
-			print_config
-			print_config_tbe
-			;;
-	esac > "${TBE_DIR}"/config.txt
-
-	# Source tryboot defaults
-	while read -r v ; do unset "${v%%=*}" ; done < <(env | grep "^TRYBOOT_")
-	for cfg in /etc/default/tryboot /etc/default/tryboot.d/* ; do
-		if [ -e "${cfg}" ] ; then
-			# shellcheck disable=SC1090
-			. "${cfg}"
-		fi
-	done
-
-	# Generate the TBE's cmdline.txt
-	case "${ENTRY}" in
-		tryboot)
-			echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${TBE_DIR}"/cmdline.txt
-			;;
-		system-default)
-			# No cmdline.txt necessary
-			;;
-		*)
-			echo "${TRYBOOT_CMDLINE_LINUX}" > "${TBE_DIR}"/cmdline.txt
-			;;
-	esac
-}
-
 function usage()
 {
 	cat <<EOF
@@ -75,7 +15,7 @@ Optional arguments:
 EOF
 }
 
-ENTRY=
+tbe=
 
 while [ ${#} -ne 0 ] ; do
 	case "${1}" in
@@ -84,11 +24,11 @@ while [ ${#} -ne 0 ] ; do
 			exit
 			;;
 		*)
-			if [ -n "${ENTRY}" ] ; then
+			if [ -n "${tbe}" ] ; then
 				echo "Invalid argument: ${1}" >&2
 				exit 2
 			fi
-			ENTRY=${1}
+			tbe=${1}
 			;;
 	esac
 	shift
@@ -97,24 +37,18 @@ done
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/lib.sh
 
-CFG_DIR=/etc/tryboot.d
-
-FW_DIR=/boot/firmware
-TB_DIR=${FW_DIR}/tryboot
-
-if grep -q "__CMDLINE__" /etc/default/tryboot ; then
-	# First time initialization
-	cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
-	sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
+if [ -n "${tbe}" ]  ; then
+	if tb_tbe_exists "${tbe}" ; then
+		echo "-- Update tryboot entry: ${tbe}"
+		tb_update_tbe "${tbe}"
+		exit
+	fi
+	echo "-- No such tryboot entry: ${tbe}" >&2
+    tb_untrap_exit
+    exit 1
 fi
 
-if [ -n "${ENTRY}" ]  ; then
-	TBE_DIR="${TB_DIR}"/"${ENTRY}"
-	update_tbe
-else
-	for tbe_dir in "${TB_DIR}"/* ; do
-		ENTRY=${tbe_dir##*/}
-		TBE_DIR="${TB_DIR}"/"${ENTRY}"
-		update_tbe
-	done
-fi
+while read -r tbe ; do
+	echo "-- Update tryboot entry: ${tbe}"
+	tb_update_tbe "${tbe}"
+done < <(tb_get_tbe_list)

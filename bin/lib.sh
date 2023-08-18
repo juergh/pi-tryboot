@@ -6,6 +6,8 @@
 # TB:  Tryboot bootloader
 # TBE: Tryboot bootloader entry
 
+set -u
+
 # ----------------------------------------------------------------------------
 # TB helpers
 
@@ -54,14 +56,9 @@ tb_enabled()
 #
 tb_enable()
 {
-	if tb_enabled ; then
-		return
+	if ! tb_enabled ; then
+		cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
 	fi
-
-	if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
-		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
-	fi
-	cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
 }
 
 #
@@ -72,6 +69,19 @@ tb_disable()
 	if tb_enabled ; then
 		cp "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
 	fi
+}
+
+#
+# Source /etc/default config files
+#
+tb_source_default_configs()
+{
+	for cfg in /etc/default/tryboot /etc/default/tryboot.d/* ; do
+		if [ -e "${cfg}" ] ; then
+			# shellcheck disable=SC1090
+			. "${cfg}"
+		fi
+	done
 }
 
 # ----------------------------------------------------------------------------
@@ -177,7 +187,7 @@ tb_boot_tbe()
 }
 
 # ----------------------------------------------------------------------------
-# TBE installation and removal helpers
+# TBE install, update and remove helpers
 
 #
 # Install the tryboot TBE
@@ -236,6 +246,94 @@ tb_install_kernel_tbe()
 	done
 	cp "${dtb_dir}"/broadcom/bcm27* "${tbe_dir}"
 	cp -r "${dtb_dir}"/overlays "${tbe_dir}"
+}
+
+#
+# Create the TBE's config.txt
+#
+tb_create_tbe_config_txt()
+{
+	tbe=${1} templ=${2}
+	tbe_dir=${TB_DIR}/${tbe}
+
+	# Determine kernel architecture
+	if file "${tbe_dir}"/vmlinuz | grep -q "zImage" ; then
+		arm_64bit=0
+	else
+		arm_64bit=1
+	fi
+
+	TRYBOOT_ENTRY=${tbe} \
+	ARM_64BIT=${arm_64bit} \
+		envsubst < /etc/tryboot.d/"${templ}" > "${tbe_dir}"/config.txt
+}
+
+#
+# Update the tryboot TBE (config.txt and cmdline.txt)
+#
+tb_update_tryboot_tbe()
+{
+	tbe_dir=${TB_DIR}/tryboot
+
+	# config.txt
+	tb_create_tbe_config_txt tryboot config.tryboot.txt
+
+	# cmdline.txt
+	tb_source_default_configs
+	echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
+}
+
+#
+# Update the system-default TBE (config.txt only)
+#
+tb_update_system_default_tbe()
+{
+	tbe_dir=${TB_DIR}/system-default
+	config_orig=${FW_DIR}/config.orig.txt
+
+	# Back up the original config.txt
+	if ! [ -e "${config_orig}" ] ; then
+		cp "${FW_DIR}"/config.txt "${config_orig}"
+	fi
+
+	# Set the default commandline
+	if grep -q "__CMDLINE__" /etc/default/tryboot ; then
+		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
+		sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
+	fi
+
+	# config.txt
+	cp "${config_orig}" "${tbe_dir}"/config.txt
+}
+
+#
+# Update a kernel TBE (config.txt and cmdline.txt)
+#
+tb_update_kernel_tbe()
+{
+	tbe=${1}
+	tbe_dir=${TB_DIR}/${tbe}
+
+	# config.txt
+	tb_create_tbe_config_txt "${tbe}" config.kernel.txt
+
+	# cmdline.txt
+	tb_source_default_configs
+	echo "${TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
+}
+
+#
+# Update a TBE (config.txt amd cmdline.txt)
+#
+tb_update_tbe()
+{
+	tbe=${1}
+
+	case "${tbe}" in
+		tryboot)        tb_update_tryboot_tbe ;;
+		system-default) tb_update_system_default_tbe ;;
+		*)              tb_update_kernel_tbe "${tbe}" ;;
+	esac
 }
 
 #
