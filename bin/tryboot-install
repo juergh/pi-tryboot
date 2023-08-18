@@ -3,61 +3,20 @@
 # Install a tryboot entry
 #
 
-init_tbe()
-{
-	# Initialize the tryboot entry (TBE) directory
-	rm -rf "${TBE_DIR}"
-	mkdir -p "${TBE_DIR}"
-}
-
-function install_tbe_tryboot()
-{
-	# Copy firmware files from the package
-	cp -r "${PKG_DIR}"/tryboot/* "${TBE_DIR}"
-}
-
-function install_tbe_system_default()
-{
-	# Nothing to install
-	return
-}
-
-function install_tbe_kernel()
-{
-	local vmlinuz initrd dtb_dir
-
-	vmlinuz=${BOOT_DIR}/vmlinuz-${ENTRY}
-	initrd=${BOOT_DIR}/initrd.img-${ENTRY}
-
-	# Copy the kernel and initrd
-	cp "${vmlinuz}" "${TBE_DIR}"/vmlinuz
-	cp "${initrd}" "${TBE_DIR}"/initrd.img
-
-	# Copy the DTBS and overlays
-	for dtb_dir in /lib/firmware/"${ENTRY}"/device-tree \
-	               /usr/lib/linux-image-"${ENTRY}" ; do
-		if [ -d "${dtb_dir}" ] ; then
-			break
-		fi
-	done
-	cp "${dtb_dir}"/broadcom/bcm27* "${TBE_DIR}"
-	cp -r "${dtb_dir}"/overlays "${TBE_DIR}"
-}
-
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h] [-r] ENTRY
+Usage: $(basename "${0}") [-h] [-r] TBE
 
 Install a tryboot entry (TBE).
 
 Positional arguments:
-  ENTRY       TBE name. Must be a kernel version of an installed kernel or:
-                tryboot:        Install the main tryboot TBE. When selected,
-                                this entry boots into the tryboot boot menu.
-                system-default: Install the system default TBE. When selected,
-                                this entry boots the 'original' kernel, i.e.,
-                                the system's default kernel.
+  TBE           TBE name. Must be a kernel version of an installed kernel or:
+                  tryboot:        Install the main tryboot TBE. When selected,
+                                  this entry boots into the tryboot boot menu.
+                  system-default: Install the system default TBE. When
+                                  selected, this entry boots the 'original'
+                                  kernel, i.e., the system's default kernel.
 
 Optional arguments:
   -h, --help    Show this help text and exit.
@@ -66,7 +25,7 @@ EOF
 }
 
 remove=0
-ENTRY=
+tbe=
 
 while [ ${#} -ne 0 ] ; do
 	case "${1}" in
@@ -78,17 +37,17 @@ while [ ${#} -ne 0 ] ; do
 			remove=1
 			;;
 		*)
-			if [ -n "${ENTRY}" ] ; then
+			if [ -n "${tbe}" ] ; then
 				echo "Invalid argument: ${1}" >&2
 				exit 2
 			fi
-			ENTRY=${1}
+			tbe=${1}
 			;;
 	esac
 	shift
 done
 
-if [ -z "${ENTRY}" ] ; then
+if [ -z "${tbe}" ] ; then
 	usage
 	exit 2
 fi
@@ -96,41 +55,30 @@ fi
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/lib.sh
 
-PKG_DIR=/usr/lib/rpi-tryboot
-
-BOOT_DIR=/boot
-TB_DIR=/boot/firmware/tryboot
-TBE_DIR=${TB_DIR}/${ENTRY}
-
 if [ ${remove} -eq 1 ] ; then
-	if [ -d "${TBE_DIR}" ] ; then
-		echo "-- No such tryboot entry: ${ENTRY}" >&2
-		exit 1
+	if tb_tbe_exists "${TBE}" ; then
+	   echo "-- Remove tryboot entry: ${TBE}"
+	   tb_remove_tbe "${TBE}"
+	   exit
 	fi
-	echo "-- Remove tryboot entry: ${ENTRY}"
-	rm -rf "${TBE_DIR}"
-	exit
+	echo "-- No such tryboot entry: ${tbe}" >&2
+	tb_untrap_exit
+	exit 1
 fi
 
+echo "-- Install tryboot entry: ${tbe}"
 
-case "${ENTRY}" in
-	tryboot|system-default)
-		target=${ENTRY//-/_}
+case "${tbe}" in
+	tryboot)
+		tb_install_tryboot_tbe
+		;;
+	system-default)
+		tb_install_system_default_tbe
 		;;
 	*)
-		if ! [ -e "${BOOT_DIR}"/vmlinuz-"${ENTRY}" ] ; then
-			echo "Invalid entry: ${ENTRY}" >&2
-			tb_untrap_exit
-			exit 1
-		fi
-		target=kernel
+		tb_install_kernel_tbe "${tbe}"
 		;;
 esac
 
-echo "-- Install tryboot entry: ${ENTRY}"
-
-init_tbe
-install_tbe_"${target}"
-
 # Update the TBE's config.txt and cmdline.txt
-tryboot-update "${ENTRY}"
+tryboot-update "${tbe}"

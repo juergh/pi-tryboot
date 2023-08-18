@@ -88,6 +88,77 @@ tb_get_default_tbe()
 }
 
 #
+# Install the tryboot TBE
+#
+tb_install_tryboot_tbe()
+{
+	tbe_dir=${TB_DIR}/tryboot
+
+	rm -rf "${tbe_dir}"
+	mkdir -p "${tbe_dir}"
+
+	# Copy firmware files from the package
+	cp -r "${PKG_DIR}"/tryboot/* "${TB_DIR}"/tryboot
+}
+
+#
+# Install the system-default TBE
+#
+tb_install_system_default_tbe()
+{
+	tbe_dir=${TB_DIR}/system-default
+
+	rm -rf "${tbe_dir}"
+	mkdir -p "${tbe_dir}"
+}
+
+#
+# Install a kernel TBE
+#
+tb_install_kernel_tbe()
+{
+	tbe=${1}
+	tbe_dir=${TB_DIR}/${tbe}
+
+	if ! [ -e "${BOOT_DIR}"/vmlinuz-"${tbe}" ] ; then
+		echo "-- Invalid kernel entry: ${tbe}" >&2
+		return 1
+	fi
+
+	rm -rf "${tbe_dir}"
+	mkdir -p "${tbe_dir}"
+
+	vmlinuz=${BOOT_DIR}/vmlinuz-${ENTRY}
+	initrd=${BOOT_DIR}/initrd.img-${ENTRY}
+
+	# Copy the kernel and initrd
+	cp "${vmlinuz}" "${tbe_dir}"/vmlinuz
+	cp "${initrd}" "${tbe_dir}"/initrd.img
+
+	# Copy the DTBS and overlays
+	for dtb_dir in /lib/firmware/"${tbe}"/device-tree \
+	               /usr/lib/linux-image-"${tbe}" ; do
+		if [ -d "${dtb_dir}" ] ; then
+			break
+		fi
+	done
+	cp "${dtb_dir}"/broadcom/bcm27* "${tbe_dir}"
+	cp -r "${dtb_dir}"/overlays "${tbe_dir}"
+}
+
+#
+# Remove a TBE
+#
+tb_remove_tbe()
+{
+	tbe=${1}
+	tbe_dir=${TB_DIR}/${tbe}
+
+	rm -rf "${tbe_dir}"
+}
+
+
+#
 # Print the boot menu
 #
 tb_print_boot_menu()
@@ -168,12 +239,14 @@ tb_boot_tbe()
 # Main entry point
 #
 
+PKG_DIR=/usr/lib/rpi-tryboot
+
+BOOT_DIR=/boot
 if [ -e /boot/firmware/config.txt ] ; then
 	FW_DIR=/boot/firmware
 else
 	FW_DIR=/boot
 fi
-
 TB_DIR=${FW_DIR}/tryboot
 
 # Install an exit handler
