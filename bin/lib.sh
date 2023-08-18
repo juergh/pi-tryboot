@@ -10,7 +10,7 @@ tb_tbe_exists()
 {
 	tbe=${1}
 
-	test -e "${TB_DIR}"/"{tbe}"/config.txt
+	test -e "${TB_DIR}"/"${tbe}"/config.txt
 }
 
 #
