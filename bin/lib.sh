@@ -3,6 +3,12 @@
 # Simple helper functions
 #
 
+# TB:  Tryboot bootloader
+# TBE: Tryboot bootloader entry
+
+# ----------------------------------------------------------------------------
+# TB helpers
+
 #
 # Exit handler
 #
@@ -34,6 +40,42 @@ tb_trap_exit()
 {
 	trap tb_exit EXIT INT TERM HUP
 }
+
+#
+# Check if tryboot bootloader is enabled
+#
+tb_enabled()
+{
+	grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt
+}
+
+#
+# Enable tryboot bootloader
+#
+tb_enable()
+{
+	if tb_enabled ; then
+		return
+	fi
+
+	if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
+		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+	fi
+	cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
+}
+
+#
+# Disable tryboot bootloader
+#
+tb_disable()
+{
+	if tb_enabled ; then
+		cp "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
+	fi
+}
+
+# ----------------------------------------------------------------------------
+# TBE inventory helpers
 
 #
 # Check if a TBE exists
@@ -86,6 +128,56 @@ tb_get_default_tbe()
 	# No saved default TBE, so use the first in the list
 	tb_get_tbe_from_index 1
 }
+
+# ----------------------------------------------------------------------------
+# TBE boot helpers
+
+#
+# Print the boot menu
+#
+tb_print_boot_menu()
+{
+	tbe_default=$(tb_get_default_tbe)
+
+	echo "------------------------------------------------------------"
+	echo "    Idx   Entry"
+	echo "------------------------------------------------------------"
+
+	idx=1
+	tb_get_tbe_list | while read -r tbe ; do 
+		if [ "${tbe}" = "${tbe_default}" ] ; then
+			def="*"
+		else
+			def=" "
+		fi
+
+		printf "%s   %3d   %s\n" "${def}" "${idx}" "${tbe}"
+		idx=$((idx + 1))
+	done
+
+	echo "------------------------------------------------------------"
+}
+
+#
+# Boot the provided TBE
+#
+tb_boot_tbe()
+{
+	tbe=${1}
+
+	config=${TB_DIR}/${tbe}/config.txt
+
+	if ! [ -e "${config}" ] ; then
+		echo "-- No such tryboot entry: ${tbe}" >&2
+		return 1
+	fi
+
+	cp "${config}" "${FW_DIR}"/tryboot.txt
+	reboot "0 tryboot"
+}
+
+# ----------------------------------------------------------------------------
+# TBE installation and removal helpers
 
 #
 # Install the tryboot TBE
@@ -157,85 +249,7 @@ tb_remove_tbe()
 	rm -rf "${tbe_dir}"
 }
 
-
-#
-# Print the boot menu
-#
-tb_print_boot_menu()
-{
-	tbe_default=$(tb_get_default_tbe)
-
-	echo "------------------------------------------------------------"
-	echo "    Idx   Entry"
-	echo "------------------------------------------------------------"
-
-	idx=1
-	tb_get_tbe_list | while read -r tbe ; do 
-		if [ "${tbe}" = "${tbe_default}" ] ; then
-			def="*"
-		else
-			def=" "
-		fi
-
-		printf "%s   %3d   %s\n" "${def}" "${idx}" "${tbe}"
-		idx=$((idx + 1))
-	done
-
-	echo "------------------------------------------------------------"
-}
-
-#
-# Check if tryboot bootloader is enabled
-#
-tb_enabled()
-{
-	grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt
-}
-
-#
-# Enable the tryboot bootloader
-#
-tb_enable()
-{
-	if tb_enabled ; then
-		return
-	fi
-
-	if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
-		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
-	fi
-	cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
-}
-
-#
-# Disable the tryboot bootloader
-#
-tb_disable()
-{
-	if tb_enabled ; then
-		cp "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
-	fi
-}
-
-#
-# Boot the provided TBE
-#
-tb_boot_tbe()
-{
-	tbe=${1}
-
-	config=${TB_DIR}/${tbe}/config.txt
-
-	if ! [ -e "${config}" ] ; then
-		echo "-- No such tryboot entry: ${tbe}" >&2
-		return 1
-	fi
-
-	cp "${config}" "${FW_DIR}"/tryboot.txt
-	reboot "0 tryboot"
-}
-
-#
+# ----------------------------------------------------------------------------
 # Main entry point
 #
 
