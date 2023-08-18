@@ -249,6 +249,20 @@ tb_install_kernel_tbe()
 }
 
 #
+# Install a TBE
+#
+tb_install_tbe()
+{
+	tbe=${1}
+
+	case "${tbe}" in
+		tryboot)        tb_install_tryboot_tbe ;;
+		system-default) tb_install_system_default_tbe ;;
+		*)              tb_install_kernel_tbe "${tbe}" ;;
+	esac
+}
+
+#
 # Create the TBE's config.txt
 #
 tb_create_tbe_config_txt()

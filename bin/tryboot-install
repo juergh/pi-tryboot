@@ -67,18 +67,7 @@ if [ ${remove} -eq 1 ] ; then
 fi
 
 echo "-- Install tryboot entry: ${tbe}"
+tb_install_tbe "${tbe}"
 
-case "${tbe}" in
-	tryboot)
-		tb_install_tryboot_tbe
-		;;
-	system-default)
-		tb_install_system_default_tbe
-		;;
-	*)
-		tb_install_kernel_tbe "${tbe}"
-		;;
-esac
-
-# Update the TBE's config.txt and cmdline.txt
+# Update the TBE
 tryboot-update "${tbe}"
