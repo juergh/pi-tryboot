@@ -113,10 +113,10 @@ trap out EXIT INT TERM HUP
 
 TBE_DIR=${TB_DIR}/${ENTRY}
 
+echo "-- Install tryboot entry: ${ENTRY}"
+
 init_tbe
 install_tbe_"${target}"
-
-echo "-- Installed tryboot entry: ${ENTRY}"
 
 # Update the TBE's config.txt and cmdline.txt
 tryboot-update "${ENTRY}"
