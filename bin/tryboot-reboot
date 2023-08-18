@@ -78,4 +78,7 @@ while [ -z "${tbe}" ] ; do
 	fi
 done
 
+echo
+echo "-- Reboot into ${tbe}"
+
 tb_boot_tbe "${tbe}"
