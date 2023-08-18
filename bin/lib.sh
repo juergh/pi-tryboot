@@ -100,7 +100,7 @@ tb_tbe_exists()
 #
 # Return the list of available TBEs
 #
-tb_get_tbe_list()
+tb_print_tbe_list()
 {
 	for tbe_dir in "${TB_DIR}"/* ; do
 		tbe=${tbe_dir##*/}
@@ -113,19 +113,19 @@ tb_get_tbe_list()
 #
 # Return the TBE for the provided index
 #
-tb_get_tbe_from_index()
+tb_print_tbe_from_index()
 {
 	idx=${1}
 
 	if [ "${idx}" -gt 0 ] 2>/dev/null ; then
-		tb_get_tbe_list | sed -n "${idx}p"
+		tb_print_tbe_list | sed -n "${idx}p"
 	fi
 }
 
 #
 # Return the default TBE
 #
-tb_get_default_tbe()
+tb_print_default_tbe()
 {
 	if [ -e "${TB_DIR}"/default ] ; then
 		tbe=$(head -1 "${TB_DIR}"/default)
@@ -136,7 +136,7 @@ tb_get_default_tbe()
 	fi
 
 	# No saved default TBE, so use the first in the list
-	tb_get_tbe_from_index 1
+	tb_print_tbe_from_index 1
 }
 
 # ----------------------------------------------------------------------------
@@ -147,14 +147,14 @@ tb_get_default_tbe()
 #
 tb_print_boot_menu()
 {
-	tbe_default=$(tb_get_default_tbe)
+	tbe_default=$(tb_print_default_tbe)
 
 	echo "------------------------------------------------------------"
 	echo "    Idx   Entry"
 	echo "------------------------------------------------------------"
 
 	idx=1
-	tb_get_tbe_list | while read -r tbe ; do 
+	tb_print_tbe_list | while read -r tbe ; do
 		if [ "${tbe}" = "${tbe_default}" ] ; then
 			def="*"
 		else

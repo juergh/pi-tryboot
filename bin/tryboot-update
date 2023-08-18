@@ -51,4 +51,4 @@ fi
 while read -r tbe ; do
 	echo "-- Update tryboot entry: ${tbe}"
 	tb_update_tbe "${tbe}"
-done < <(tb_get_tbe_list)
+done < <(tb_print_tbe_list)

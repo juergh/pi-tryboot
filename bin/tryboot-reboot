@@ -53,10 +53,10 @@ while [ -z "${tbe}" ] ; do
 			exit
 			;;
 		"")
-			tbe=$(tb_get_default_tbe)
+			tbe=$(tb_print_default_tbe)
 			;;
 		*)
-			tbe=$(tb_get_tbe_from_index "${idx}")
+			tbe=$(tb_print_tbe_from_index "${idx}")
 			;;
 	esac
 done
