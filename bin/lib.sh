@@ -44,7 +44,7 @@ tb_get_tbe_from_index()
 tb_get_default_tbe()
 {
 	if [ -e "${TB_DIR}"/default ] ; then
-		tbe=$(head -1 "${TB_DIR}")
+		tbe=$(head -1 "${TB_DIR}"/default)
 		if tb_tbe_exists "${tbe}" ; then
 			echo "${tbe}"
 			return
