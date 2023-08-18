@@ -3,37 +3,78 @@
 # Simple helper functions
 #
 
-tb_print_menu()
+#
+# Check if a TBE exists
+#
+tb_tbe_exists()
 {
-	# Saved default
-	tbe_default=
+	tbe=${1}
+
+	test -e "${TB_DIR}"/"{tbe}"/config.txt
+}
+
+#
+# Return the list of available TBEs
+#
+tb_get_tbe_list()
+{
+	for tbe_dir in "${TB_DIR}"/* ; do
+		tbe=${tbe_dir##*/}
+		if [ "${tbe}" != "tryboot" ] && [ -e "${tbe_dir}"/config.txt ] ; then
+			echo "${tbe}"
+		fi
+	done
+}
+
+#
+# Return the TBE for the provided index
+#
+tb_get_tbe_from_index()
+{
+	idx=${1}
+
+	if [ "${idx}" -gt 0 ] 2>/dev/null ; then
+		tb_get_tbe_list | sed -n "${idx}p"
+	fi
+}
+
+#
+# Return the default TBE
+#
+tb_get_default_tbe()
+{
 	if [ -e "${TB_DIR}"/default ] ; then
-		tbe_default=$(head -1 "${TB_DIR}")
-		if ! [ -e "${TB_DIR}"/"{tbe_default}"/config.txt ] ; then
-			tbe_default=
+		tbe=$(head -1 "${TB_DIR}")
+		if tb_tbe_exists "${tbe}" ; then
+			echo "${tbe}"
+			return
 		fi
 	fi
 
+	# No saved default TBE, so use the first in the list
+	tb_get_tbe_from_index 1
+}
+
+#
+# Print the boot menu
+#
+tb_print_boot_menu()
+{
+	tbe_default=$(tb_get_default_tbe)
+
 	echo "------------------------------------------------------------"
-	echo "  Idx   Entry"
+	echo "    Idx   Entry"
 	echo "------------------------------------------------------------"
 
 	idx=1
-	for tbe_dir in "${TB_DIR}"/* ; do
-		tbe=${tbe_dir##*/}
-		if [ "${tbe}" = "tryboot" ] || ! [ -e "${tbe_dir}"/config.txt ] ; then
-			continue
-		fi
-
-		if [ -z "${tbe_default}" ] && [ ${idx} -eq  1 ] ; then
-			def="*"
-		elif [ -n "${tbe_default}" ] && [ "${tbe}" = "${tbe_default}" ] ; then
+	tb_get_tbe_list | while read -r tbe ; do 
+		if [ "${tbe}" = "${tbe_default}" ] ; then
 			def="*"
 		else
 			def=" "
 		fi
 
-		printf "%s %3d   %s\n" "${def}" "${idx}" "${tbe}"
+		printf "%s   %3d   %s\n" "${def}" "${idx}" "${tbe}"
 		idx=$((idx + 1))
 	done
 
@@ -41,7 +82,25 @@ tb_print_menu()
 }
 
 #
-# Set globals
+# Boot the provided TBE
+#
+tb_boot_tbe()
+{
+	tbe=${1}
+
+	config=${TB_DIR}/${tbe}/config.txt
+
+	if ! [ -e "${config}" ] ; then
+		echo "-- No such tryboot entry: ${tbe}" >&2
+		return 1
+	fi
+
+	cp "${config}" "${FW_DIR}"/tryboot.txt
+	reboot "0 tryboot"
+}
+
+#
+# Main entry point
 #
 
 if [ -e /boot/firmware/config.txt ] ; then
