@@ -35,16 +35,24 @@ function install_tbe_system_default()
 
 function install_tbe_kernel()
 {
-	local vmlinuz initrd
+	local vmlinuz initrd dtb_dir
 
 	vmlinuz=${BOOT_DIR}/vmlinuz-${ENTRY}
 	initrd=${BOOT_DIR}/initrd.img-${ENTRY}
 
-	# Copy the kernel, initrd, DTBs and overlays
+	# Copy the kernel and initrd
 	cp "${vmlinuz}" "${TBE_DIR}"/vmlinuz
 	cp "${initrd}" "${TBE_DIR}"/initrd.img
-	cp /lib/firmware/"${ENTRY}"/device-tree/broadcom/bcm27* "${TBE_DIR}"
-	cp -r /lib/firmware/"${ENTRY}"/device-tree/overlays "${TBE_DIR}"
+
+	# Copy the DTBS and overlays
+	for dtb_dir in /lib/firmware/"${ENTRY}"/device-tree \
+	               /usr/lib/linux-image-"${ENTRY}" ; do
+		if [ -d "${dtb_dir}" ] ; then
+			break
+		fi
+	done
+	cp "${dtb_dir}"/broadcom/bcm27* "${TBE_DIR}"
+	cp -r "${dtb_dir}"/overlays "${TBE_DIR}"
 }
 
 function usage()
