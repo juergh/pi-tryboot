@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -e
+
+version=$1
+
+[ -x tryboot-install ] || exit 0
+
+if [ -z "${version}" ] ; then
+    echo "W: rpi-tryboot: Missing kernel version" >&2
+    exit 2
+fi
+
+# Avoid running multiple times
+if [ -n "$DEB_MAINT_PARAMS" ] ; then
+    eval set -- "$DEB_MAINT_PARAMS"
+    if [ -z "$1" ] || [ "$1" != "remove" ] ; then
+        exit 0
+    fi
+fi
+
+tryboot-install -r "${version}" >&2

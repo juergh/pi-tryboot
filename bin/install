@@ -24,3 +24,9 @@ cp bin/lib.sh "${lib_tb_dir}"
 mkdir -p "${etc_dir}"/default/tryboot.d "${etc_dir}"/tryboot.d
 cp etc/tryboot "${etc_dir}"/default/
 cp etc/tryboot.d/* "${etc_dir}"/tryboot.d/
+
+# Install kernel postinst and postrm hooks
+for d in postinst.d postrm.d ; do
+	mkdir -p "${etc_dir}"/kernel/"${d}"
+	cp etc/kernel/"${d}"/* "${etc_dir}"/kernel/"${d}"/
+done
