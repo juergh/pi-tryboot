@@ -1,0 +1,11 @@
+#!/bin/bash -eu
+
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/lib.sh
+
+if tb_inited ; then
+	echo "-- Tryboot bootloader is already initialized"
+else
+	tb_init
+	echo "-- Tryboot bootloader initialized"
+fi

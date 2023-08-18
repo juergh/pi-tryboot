@@ -12,11 +12,8 @@ Install a tryboot entry (TBE).
 
 Positional arguments:
   TBE           TBE name. Must be a kernel version of an installed kernel or:
-                  tryboot:        Install the main tryboot TBE. When selected,
-                                  this entry boots into the tryboot boot menu.
-                  system-default: Install the system default TBE. When
-                                  selected, this entry boots the 'original'
-                                  kernel, i.e., the system's default kernel.
+                  tryboot:  Install the tryboot TBE. When selected, this
+				            entry boots into the tryboot boot menu.
 
 Optional arguments:
   -h, --help    Show this help text and exit.

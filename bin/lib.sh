@@ -44,6 +44,29 @@ tb_trap_exit()
 }
 
 #
+# Check if tryboot bootloader is initialized
+#
+tb_inited()
+{
+	test -e "${FW_DIR}"/config.orig.txt
+}
+
+#
+# Initialize tryboot bootloader
+#
+tb_init()
+{
+	if ! tb_inited ; then
+		# Back up the original config.txt
+		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+
+		# Set the default commandline
+		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
+		sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
+	fi
+}
+
+#
 # Check if tryboot bootloader is enabled
 #
 tb_enabled()
@@ -104,7 +127,7 @@ tb_print_tbe_list()
 {
 	for tbe_dir in "${TB_DIR}"/* ; do
 		tbe=${tbe_dir##*/}
-		if [ "${tbe}" != "tryboot" ] && [ -e "${tbe_dir}"/config.txt ] ; then
+		if [ -e "${tbe_dir}"/config.txt ] ; then
 			echo "${tbe}"
 		fi
 	done
@@ -204,17 +227,6 @@ tb_install_tryboot_tbe()
 }
 
 #
-# Install the system-default TBE
-#
-tb_install_system_default_tbe()
-{
-	tbe_dir=${TB_DIR}/system-default
-
-	rm -rf "${tbe_dir}"
-	mkdir -p "${tbe_dir}"
-}
-
-#
 # Install a kernel TBE
 #
 tb_install_kernel_tbe()
@@ -256,9 +268,8 @@ tb_install_tbe()
 	tbe=${1}
 
 	case "${tbe}" in
-		tryboot)        tb_install_tryboot_tbe ;;
-		system-default) tb_install_system_default_tbe ;;
-		*)              tb_install_kernel_tbe "${tbe}" ;;
+		tryboot) tb_install_tryboot_tbe ;;
+		*)       tb_install_kernel_tbe "${tbe}" ;;
 	esac
 }
 
@@ -298,29 +309,6 @@ tb_update_tryboot_tbe()
 }
 
 #
-# Update the system-default TBE (config.txt only)
-#
-tb_update_system_default_tbe()
-{
-	tbe_dir=${TB_DIR}/system-default
-	config_orig=${FW_DIR}/config.orig.txt
-
-	# Back up the original config.txt
-	if ! [ -e "${config_orig}" ] ; then
-		cp "${FW_DIR}"/config.txt "${config_orig}"
-	fi
-
-	# Set the default commandline
-	if grep -q "__CMDLINE__" /etc/default/tryboot ; then
-		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
-		sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
-	fi
-
-	# config.txt
-	cp "${config_orig}" "${tbe_dir}"/config.txt
-}
-
-#
 # Update a kernel TBE (config.txt and cmdline.txt)
 #
 tb_update_kernel_tbe()
@@ -344,9 +332,8 @@ tb_update_tbe()
 	tbe=${1}
 
 	case "${tbe}" in
-		tryboot)        tb_update_tryboot_tbe ;;
-		system-default) tb_update_system_default_tbe ;;
-		*)              tb_update_kernel_tbe "${tbe}" ;;
+		tryboot) tb_update_tryboot_tbe ;;
+		*)       tb_update_kernel_tbe "${tbe}" ;;
 	esac
 }
 
