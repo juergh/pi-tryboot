@@ -4,7 +4,7 @@ set -e
 
 version=$1
 
-[ -x tryboot-install ] || exit 0
+which tryboot-install >/dev/null 2>&1 || exit 0
 
 if [ -z "${version}" ] ; then
     echo "W: rpi-tryboot: Missing kernel version" >&2
