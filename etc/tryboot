@@ -4,4 +4,4 @@
 TRYBOOT_CMDLINE_LINUX="__CMDLINE__"
 
 # Special settings for the 'tryboot' TBE
-TRYBOOT_TRYBOOT_CMDLINE_LINUX=
+TRYBOOT_TRYBOOT_CMDLINE_LINUX="console=tty1 console=serial0,115200"
