@@ -21,20 +21,26 @@ function out()
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h]
+Usage: $(basename "${0}") [-h] [-s]
 
 Reboot into a tryboot entry (TBE).
 
 Optional arguments:
   -h, --help  Show this help text and exit.
+  -s, --show  Show the boot menu and exit.
 EOF
 }
+
+show=0
 
 while [ ${#} -ne 0 ] ; do
 	case "${1}" in
 		-h|--help)
 			usage
 			exit
+			;;
+		-s|--show)
+			show=1
 			;;
 		*)
 			echo "Invalid argument: ${1}" >&2
@@ -54,6 +60,11 @@ trap out EXIT INT TERM HUP
 . "${PKG_DIR}"/lib.sh
 
 tb_print_boot_menu
+
+if [ ${show} -eq 1 ] ; then
+	exit
+fi
+
 echo
 
 tbe=
