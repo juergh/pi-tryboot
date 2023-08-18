@@ -3,17 +3,6 @@
 # Install a tryboot entry
 #
 
-function out()
-{
-	local rc=${?}
-
-	trap - EXIT INT TERM HUP
-
-	if [ ${rc} -ne 0 ] ; then
-		echo "Script failed" >&2
-	fi
-}
-
 init_tbe()
 {
 	# Initialize the tryboot entry (TBE) directory
@@ -104,6 +93,9 @@ if [ -z "${ENTRY}" ] ; then
 	exit 2
 fi
 
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/lib.sh
+
 PKG_DIR=/usr/lib/rpi-tryboot
 
 BOOT_DIR=/boot
@@ -120,6 +112,7 @@ if [ ${remove} -eq 1 ] ; then
 	exit
 fi
 
+
 case "${ENTRY}" in
 	tryboot|system-default)
 		target=${ENTRY//-/_}
@@ -127,13 +120,12 @@ case "${ENTRY}" in
 	*)
 		if ! [ -e "${BOOT_DIR}"/vmlinuz-"${ENTRY}" ] ; then
 			echo "Invalid entry: ${ENTRY}" >&2
+			tb_untrap_exit
 			exit 1
 		fi
 		target=kernel
 		;;
 esac
-
-trap out EXIT INT TERM HUP
 
 echo "-- Install tryboot entry: ${ENTRY}"
 

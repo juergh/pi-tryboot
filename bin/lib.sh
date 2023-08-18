@@ -4,6 +4,38 @@
 #
 
 #
+# Exit handler
+#
+tb_exit()
+{
+	rc=${?}
+
+	tb_untrap_exit
+
+	if [ ${rc} -ne 0 ] ; then
+		echo "-- Script failed" >&2
+	fi
+
+	exit "${rc}"
+}
+
+#
+# Remove exit handler
+#
+tb_untrap_exit()
+{
+	trap - EXIT INT TERM HUP
+}
+
+#
+# Install exit handler
+#
+tb_trap_exit()
+{
+	trap tb_exit EXIT INT TERM HUP
+}
+
+#
 # Check if a TBE exists
 #
 tb_tbe_exists()
@@ -82,6 +114,39 @@ tb_print_boot_menu()
 }
 
 #
+# Check if tryboot bootloader is enabled
+#
+tb_enabled()
+{
+	grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt
+}
+
+#
+# Enable the tryboot bootloader
+#
+tb_enable()
+{
+	if tb_enabled ; then
+		return
+	fi
+
+	if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
+		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+	fi
+	cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
+}
+
+#
+# Disable the tryboot bootloader
+#
+tb_disable()
+{
+	if tb_enabled ; then
+		cp "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
+	fi
+}
+
+#
 # Boot the provided TBE
 #
 tb_boot_tbe()
@@ -110,3 +175,6 @@ else
 fi
 
 TB_DIR=${FW_DIR}/tryboot
+
+# Install an exit handler
+tb_trap_exit

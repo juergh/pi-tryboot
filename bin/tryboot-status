@@ -1,8 +1,9 @@
 #!/bin/bash -eu
 
-FW_DIR=/boot/firmware
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/lib.sh
 
-if grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt ; then
+if tb_enabled ; then
 	echo "-- Tryboot bootloader is enabled"
 else
 	echo "-- Tryboot bootloader is disabled"

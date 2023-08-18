@@ -1,15 +1,11 @@
 #!/bin/bash -eu
 
-FW_DIR=/boot/firmware
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/lib.sh
 
-if grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt ; then
+if tb_enabled ; then
 	echo "-- Tryboot bootloader is already enabled"
-	exit
+else
+	tb_enable
+	echo "-- Tryboot bootloader enabled"
 fi
-
-if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
-	cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
-fi
-cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
-
-echo "-- Tryboot bootloader enabled"

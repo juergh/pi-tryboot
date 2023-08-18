@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 #
-# Reboot into a tryboot entry
+# Show tryboot entries
 #
 
 function usage()
@@ -8,7 +8,7 @@ function usage()
 	cat <<EOF
 Usage: $(basename "${0}") [-h]
 
-Reboot into a tryboot entry (TBE).
+Show tryboot entries (TBE).
 
 Optional arguments:
   -h, --help  Show this help text and exit.
@@ -30,31 +30,7 @@ while [ ${#} -ne 0 ] ; do
 	shift
 done
 
-
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/lib.sh
 
 tb_print_boot_menu
-echo
-
-tbe=
-while [ -z "${tbe}" ] ; do
-	printf "Choice: "
-	read -r idx
-	case "${idx,,}" in
-		x|q)
-			exit
-			;;
-		"")
-			tbe=$(tb_get_default_tbe)
-			;;
-		*)
-			tbe=$(tb_get_tbe_from_index "${idx}")
-			;;
-	esac
-done
-
-echo
-echo "-- Reboot into ${tbe}"
-
-tb_boot_tbe "${tbe}"
