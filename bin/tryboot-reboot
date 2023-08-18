@@ -9,6 +9,10 @@ function out()
 
 	trap - EXIT INT TERM HUP
 
+	if [ -n "${MENU}" ] ; then
+		rm -f "${MENU}"
+	fi
+
 	if [ ${rc} -ne 0 ] ; then
 		echo "Script failed" >&2
 	fi
@@ -43,9 +47,24 @@ done
 
 PKG_DIR=/usr/lib/rpi-tryboot
 
+MENU=
 trap out EXIT INT TERM HUP
 
 # shellcheck disable=SC1091
 . "${PKG_DIR}"/lib.sh
 
-tb_print_menu
+tb_print_boot_menu
+echo
+
+tbe=
+while [ -z "${tbe}" ] ; do
+	printf "Choice: "
+	read -r idx
+	if [ -z "${idx}" ] ; then
+		tbe=$(tb_get_default_tbe)
+	else
+		tbe=$(tb_get_tbe_from_index "${idx}")
+	fi
+done
+
+tb_boot_tbe "${tbe}"
