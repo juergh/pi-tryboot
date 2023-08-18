@@ -35,7 +35,14 @@ done
 . /usr/lib/rpi-tryboot/lib.sh
 
 tb_print_boot_menu
-echo
+
+cat <<EOF
+
+Press ENTER to boot the default TBE (*).
+Enter the index number to boot the corresponding TBE.
+Enter 'x' or 'q' to exit.
+
+EOF
 
 tbe=
 while [ -z "${tbe}" ] ; do
