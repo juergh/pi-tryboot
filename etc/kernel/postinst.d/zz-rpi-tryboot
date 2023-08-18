@@ -20,4 +20,3 @@ if [ -n "$DEB_MAINT_PARAMS" ]; then
 fi
 
 tryboot-install "${version}" >&2
-tryboot-update "${version}" >&2
