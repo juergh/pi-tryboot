@@ -50,7 +50,7 @@ function install_tbe_kernel()
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h] ENTRY
+Usage: $(basename "${0}") [-h] [-r] ENTRY
 
 Install a tryboot entry (TBE).
 
@@ -63,10 +63,12 @@ Positional arguments:
                                 the system's default kernel.
 
 Optional arguments:
-  -h, --help  Show this help text and exit.
+  -h, --help    Show this help text and exit.
+  -r, --remove  Remove the TBE.
 EOF
 }
 
+remove=0
 ENTRY=
 
 while [ ${#} -ne 0 ] ; do
@@ -74,6 +76,9 @@ while [ ${#} -ne 0 ] ; do
 		-h|--help)
 			usage
 			exit
+			;;
+		-r|--remove)
+			remove=1
 			;;
 		*)
 			if [ -n "${ENTRY}" ] ; then
@@ -95,13 +100,24 @@ PKG_DIR=/usr/lib/rpi-tryboot
 
 BOOT_DIR=/boot
 TB_DIR=/boot/firmware/tryboot
+TBE_DIR=${TB_DIR}/${ENTRY}
+
+if [ ${remove} -eq 1 ] ; then
+	if [ -d "${TBE_DIR}" ] ; then
+		echo "-- No such tryboot entry: ${ENTRY}" >&2
+		exit 1
+	fi
+	echo "-- Remove tryboot entry: ${ENTRY}"
+	rm -rf "${TBE_DIR}"
+	exit
+fi
 
 case "${ENTRY}" in
 	tryboot|system-default)
 		target=${ENTRY//-/_}
 		;;
 	*)
-		if ! [ -e /boot/vmlinuz-"${ENTRY}" ] ; then
+		if ! [ -e "${BOOT_DIR}"/vmlinuz-"${ENTRY}" ] ; then
 			echo "Invalid entry: ${ENTRY}" >&2
 			exit 1
 		fi
@@ -110,8 +126,6 @@ case "${ENTRY}" in
 esac
 
 trap out EXIT INT TERM HUP
-
-TBE_DIR=${TB_DIR}/${ENTRY}
 
 echo "-- Install tryboot entry: ${ENTRY}"
 
