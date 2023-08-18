@@ -230,8 +230,8 @@ tb_install_kernel_tbe()
 	rm -rf "${tbe_dir}"
 	mkdir -p "${tbe_dir}"
 
-	vmlinuz=${BOOT_DIR}/vmlinuz-${ENTRY}
-	initrd=${BOOT_DIR}/initrd.img-${ENTRY}
+	vmlinuz=${BOOT_DIR}/vmlinuz-${tbe}
+	initrd=${BOOT_DIR}/initrd.img-${tbe}
 
 	# Copy the kernel and initrd
 	cp "${vmlinuz}" "${tbe_dir}"/vmlinuz
