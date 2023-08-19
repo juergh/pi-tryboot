@@ -1,20 +1,24 @@
-#!/bin/sh
-
+#! /bin/sh
 set -e
-
-version=$1
 
 which tryboot-install >/dev/null 2>&1 || exit 0
 
+if type systemd-detect-virt >/dev/null 2>&1 &&
+   systemd-detect-virt --quiet --container ; then
+	exit 0
+fi
+
+version=${1}
+
 if [ -z "${version}" ] ; then
-    echo "W: rpi-tryboot: Missing kernel version" >&2
-    exit 2
+	echo "W: rpi-tryboot: Missing kernel version" >&2
+	exit 2
 fi
 
 # Avoid running multiple times
-if [ -n "$DEB_MAINT_PARAMS" ]; then
-    eval set -- "$DEB_MAINT_PARAMS"
-    if [ -z "$1" ] || [ "$1" != "remove" ]; then
+if [ -n "${DEB_MAINT_PARAMS}" ] ; then
+    eval set -- "${DEB_MAINT_PARAMS}"
+    if [ -z "${1}" ] || [ "${1}" != "configure" ] ; then
         exit 0
     fi
 fi
