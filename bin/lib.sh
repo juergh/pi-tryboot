@@ -116,12 +116,13 @@ tb_source_default_configs()
 tb_tbe_exists()
 {
 	tbe=${1}
+	tbe_dir=${TB_DIR}/${tbe}
 
-	test -n "${tbe}" && test -d "${TB_DIR}"/"${tbe}"
+	test -e "${tbe_dir}"/.tbe
 }
 
 #
-# Return the list of available TBEs
+# Return the list of bootable TBEs
 #
 tb_print_tbe_list()
 {
@@ -251,6 +252,9 @@ tb_install_tryboot_tbe()
 
 	# Copy firmware files from the package
 	cp -r "${PKG_DIR}"/tryboot/* "${TB_DIR}"/tryboot
+
+	# Add TBE marker
+	touch "${tbe_dir}"/.tbe
 }
 
 #
@@ -285,6 +289,9 @@ tb_install_kernel_tbe()
 	done
 	cp "${dtb_dir}"/broadcom/bcm27* "${tbe_dir}"
 	cp -r "${dtb_dir}"/overlays "${tbe_dir}"
+
+	# Add TBE marker
+	touch "${tbe_dir}"/.tbe
 }
 
 #
