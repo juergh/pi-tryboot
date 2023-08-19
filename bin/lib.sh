@@ -117,7 +117,7 @@ tb_tbe_exists()
 {
 	tbe=${1}
 
-	test -d "${TB_DIR}"/"${tbe}"
+	test -n "${tbe}" && test -d "${TB_DIR}"/"${tbe}"
 }
 
 #
@@ -150,16 +150,43 @@ tb_print_tbe_from_index()
 #
 tb_print_default_tbe()
 {
-	if [ -e "${TB_DIR}"/default ] ; then
-		tbe=$(head -1 "${TB_DIR}"/default)
-		if tb_tbe_exists "${tbe}" ; then
-			echo "${tbe}"
-			return
-		fi
+	tbe=$(tb_print_saved_default_tbe)
+	if tb_tbe_exists "${tbe}" ; then
+		echo "${tbe}"
+	else
+		# No saved default TBE, so use the first in the list
+		tb_print_tbe_from_index 1
 	fi
+}
 
-	# No saved default TBE, so use the first in the list
-	tb_print_tbe_from_index 1
+#
+# Return the saved default TBE
+#
+tb_print_saved_default_tbe()
+{
+	if [ -e "${TB_DIR}"/default ] ; then
+		cat "${TB_DIR}"/default
+	fi
+}
+
+#
+# Set the default TBE
+#
+tb_set_default_tbe()
+{
+	tbe=${1}
+
+	if tb_tbe_exists "${tbe}" ; then
+		echo "${tbe}" > "${TB_DIR}"/default
+	fi
+}
+
+#
+# Clear the default TBE
+#
+tb_clear_default_tbe()
+{
+	rm -f "${TB_DIR}"/default
 }
 
 # ----------------------------------------------------------------------------
