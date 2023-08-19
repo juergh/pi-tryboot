@@ -372,6 +372,19 @@ tb_update_tbe()
 }
 
 #
+# Update all TBEs
+#
+tb_update_all_tbes()
+{
+	for tbe_dir in "${TB_DIR}"/* ; do
+		tbe=${tbe_dir##*/}
+		if [ -e "${tbe_dir}"/.tbe ] ; then
+			tb_update_tbe "${tbe}"
+		fi
+	done
+}
+
+#
 # Remove a TBE
 #
 tb_remove_tbe()
