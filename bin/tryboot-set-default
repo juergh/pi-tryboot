@@ -1,0 +1,58 @@
+#!/bin/bash -eu
+#
+# Set default tryboot entry
+#
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] [-r] [TBE]
+
+Set the default tryboot entry (TBE).
+
+Positional arguments:
+  TBE         Tryboot entry name. If not provided, clears the default TBE
+              which means that the first entry of the boot menu is the
+              default.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+tbe=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			if [ -n "${tbe}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			tbe=${1}
+			;;
+	esac
+	shift
+done
+
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/lib.sh
+
+if [ -z "${tbe}" ] ; then
+	echo "-- Clear default tryboot entry"
+	tb_clear_default_tbe
+	exit
+fi
+
+if ! tb_tbe_exists "${tbe}" ; then
+	echo "-- No such tryboot entry: ${tbe}" >&2
+	tb_untrap_exit
+	exit 1
+fi
+
+echo "-- Set default tryboot entry: ${tbe}"
+tb_set_default_tbe "${tbe}"
