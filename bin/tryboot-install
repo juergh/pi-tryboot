@@ -11,7 +11,8 @@ Usage: $(basename "${0}") [-h] [-r] TBE
 Install a tryboot entry (TBE).
 
 Positional arguments:
-  TBE           TBE name. Must be a kernel version of an installed kernel or:
+  TBE           Tryboot entry name. Must be a kernel version of an installed
+                kernel or:
                   tryboot:  Install the tryboot TBE. When selected, this
 				            entry boots into the tryboot boot menu.
 
