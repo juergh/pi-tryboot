@@ -53,9 +53,9 @@ fi
 . /usr/lib/rpi-tryboot/lib.sh
 
 if [ ${remove} -eq 1 ] ; then
-	if tb_tbe_exists "${TBE}" ; then
-	   echo "-- Remove tryboot entry: ${TBE}"
-	   tb_remove_tbe "${TBE}"
+	if tb_tbe_exists "${tbe}" ; then
+	   echo "-- Remove tryboot entry: ${tbe}"
+	   tb_remove_tbe "${tbe}"
 	   exit
 	fi
 	echo "-- No such tryboot entry: ${tbe}" >&2
