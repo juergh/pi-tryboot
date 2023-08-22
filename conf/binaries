@@ -1,1 +1,3 @@
 /bin/busybox
+/lib/klibc-*.so
+/lib/klibc/bin/reboot
