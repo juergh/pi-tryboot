@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Update the firmware in firmware/
+#
+
+./bin/download-image
+image=$(./bin/download-image | sed 's,.* ,,')
+
+MOUNTPOINT=$(mktemp -d)
+sudo ./bin/mount-image "${image}" "${MOUNTPOINT}"
+
+./bin/import-firmware "${MOUNTPOINT}"
+
+sudo umount "${MOUNTPOINT}"/boot/firmware
+sudo umount "${MOUNTPOINT}"
