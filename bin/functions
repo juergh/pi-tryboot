@@ -224,7 +224,7 @@ tb_print_boot_menu()
 #
 tb_boot_tbe()
 {
-	tbe=${1}
+	tbe=${1} use_klibc=${2:-}
 
 	config=${TB_DIR}/${tbe}/config.txt
 
@@ -234,7 +234,11 @@ tb_boot_tbe()
 	fi
 
 	cp "${config}" "${FW_DIR}"/tryboot.txt
-	reboot "0 tryboot"
+	if [ "${use_klibc}" = "use_klibc" ] ; then
+		/usr/lib/klibc/bin/reboot "0 tryboot"
+	else
+		reboot "0 tryboot"
+	fi
 }
 
 # ----------------------------------------------------------------------------
