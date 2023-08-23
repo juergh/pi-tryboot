@@ -50,57 +50,37 @@ done
 # Mount the boot partition
 mount "${boot_part}" /boot
 
-# Main loop
-tmp=$(mktemp)
-while true ; do
-	true > "${tmp}"
+# shellcheck disable=SC1091
+. /scripts/functions
 
-	echo
-	echo
-	echo "------------------------------------------------------------"
-	echo "  Idx   Entry"
-	echo "------------------------------------------------------------"
+tbe=
+while [ -z "${tbe}" ] ; do
+	  tb_print_boot_menu initrd
 
-	idx=1
-	for tbe_dir in /boot/tryboot/* ; do
-		tbe=${tbe_dir##*/}
-		if [ "${tbe}" = "tryboot" ] || ! [ -e "${tbe_dir}"/config.txt ] ; then
-			continue
-		fi
+	  cat <<EOF
 
-		printf "  %3d   %s\n" "${idx}" "${tbe}"
-		echo "${idx} ${tbe}" >> "${tmp}"
-		idx=$((idx + 1))
-	done
+Press ENTER to boot the default TBE (*).
+Enter the index number to boot (or execute) the corresponding TBE.
 
-	cat <<EOF
-
-  90   Run a shell
 EOF
-	echo "90 foo" >> "${tmp}"
 
-	echo "------------------------------------------------------------"
-	echo
-
-	printf "Choice: "
-	read -r idx
-	tbe=$(grep "^${idx} " "${tmp}")
-	tbe=${tbe#* }
-
-	if [ -z "${tbe}" ] ; then
-		continue
-	fi
-
-	case "${idx}" in
-		90)
-			/bin/sh
-			;;
-		*)
-			if cp /boot/tryboot/"${tbe}"/config.txt /boot/tryboot.txt ; then
-				sync
-				umount /boot
-				reboot -f "0 tryboot"
-			fi
-			;;
-	esac
+	  printf "Choice: "
+	  read -r idx
+	  case "${idx}" in
+		  90)
+			  /bin/sh
+			  ;;
+		  "")
+			  tbe=$(tb_print_default_tbe)
+			  ;;
+		  *)
+			  tbe=$(tb_print_tbe_from_index "${idx}")
+			  ;;
+	  esac
 done
+
+echo
+echo "-- Reboot into ${tbe}"
+echo
+
+tb_boot_tbe "${tbe}" use_klibc

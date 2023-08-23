@@ -56,9 +56,10 @@ echo "-- Copy files to ${initrdd}"
 # Copy the init script
 cp bin/init "${initrdd}"
 
-# Copy config files
-mkdir -p "${initrdd}"/conf
+# Copy config files and scripts
+mkdir -p "${initrdd}"/{conf,scripts}
 cp conf/* "${initrdd}"/conf
+cp bin/functions "${initrdd}"/scripts
 
 # Copy the firmware
 rsync --verbose --archive --ignore-existing --exclude '/boot/' \
