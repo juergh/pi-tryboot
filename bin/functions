@@ -97,7 +97,7 @@ tb_disable()
 #
 # Source /etc/default config files
 #
-tb_source_default_configs()
+tb_source_etc_default_configs()
 {
 	for cfg in /etc/default/tryboot /etc/default/tryboot.d/* ; do
 		if [ -e "${cfg}" ] ; then
@@ -364,7 +364,7 @@ tb_update_tryboot_tbe()
 	tb_create_tbe_config_txt tryboot config.tryboot.txt
 
 	# cmdline.txt
-	tb_source_default_configs
+	tb_source_etc_default_configs
 	echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
 }
 
@@ -380,7 +380,7 @@ tb_update_kernel_tbe()
 	tb_create_tbe_config_txt "${tbe}" config.kernel.txt
 
 	# cmdline.txt
-	tb_source_default_configs
+	tb_source_etc_default_configs
 	echo "${TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
 }
 
