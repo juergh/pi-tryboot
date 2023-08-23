@@ -32,7 +32,7 @@ done
 
 
 # shellcheck disable=SC1091
-. /usr/lib/rpi-tryboot/lib.sh
+. /usr/lib/rpi-tryboot/functions
 
 tb_print_boot_menu
 

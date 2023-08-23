@@ -51,7 +51,7 @@ if [ -z "${tbe}" ] ; then
 fi
 
 # shellcheck disable=SC1091
-. /usr/lib/rpi-tryboot/lib.sh
+. /usr/lib/rpi-tryboot/functions
 
 if [ ${remove} -eq 1 ] ; then
 	if tb_tbe_exists "${tbe}" ; then

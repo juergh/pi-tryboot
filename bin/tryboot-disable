@@ -2,7 +2,7 @@
 
 
 # shellcheck disable=SC1091
-. /usr/lib/rpi-tryboot/lib.sh
+. /usr/lib/rpi-tryboot/functions
 
 if tb_enabled ; then
 	tb_disable
