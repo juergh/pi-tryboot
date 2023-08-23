@@ -198,6 +198,7 @@ tb_clear_default_tbe()
 #
 tb_print_boot_menu()
 {
+	initrd=${1:-}
 	tbe_default=$(tb_print_default_tbe)
 
 	echo "------------------------------------------------------------"
@@ -215,6 +216,11 @@ tb_print_boot_menu()
 		printf "%s   %3d   %s\n" "${def}" "${idx}" "${tbe}"
 		idx=$((idx + 1))
 	done
+
+	if [ "${initrd}" = "initrd" ] ; then
+		echo
+		echo "     90   Run a shell"
+	fi
 
 	echo "------------------------------------------------------------"
 }

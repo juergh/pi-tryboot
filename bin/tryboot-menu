@@ -6,14 +6,17 @@
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h]
+Usage: $(basename "${0}") [-h] [-i]
 
-Show tryboot entries (TBE).
+Show the tryboot boot menu (TBM).
 
 Optional arguments:
-  -h, --help  Show this help text and exit.
+  -h, --help    Show this help text and exit.
+  -i, --initrd  Show the initrd version of the TBM.
 EOF
 }
+
+initrd=
 
 while [ ${#} -ne 0 ] ; do
 	case "${1}" in
@@ -21,16 +24,18 @@ while [ ${#} -ne 0 ] ; do
 			usage
 			exit
 			;;
+		-i|--initrd)
+			initrd="initrd"
+			;;
 		*)
 			echo "Invalid argument: ${1}" >&2
 			exit 2
 			;;
 	esac
-	# shellcheck disable=SC2317
 	shift
 done
 
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/functions
 
-tb_print_boot_menu
+tb_print_boot_menu "${initrd}"
