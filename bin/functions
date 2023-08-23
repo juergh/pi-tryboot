@@ -107,6 +107,14 @@ tb_source_etc_default_configs()
 	done
 }
 
+#
+# Check if running in the initrd
+#
+tb_in_initrd()
+{
+	test -d /scripts
+}
+
 # ----------------------------------------------------------------------------
 # TBE inventory helpers
 
@@ -246,7 +254,7 @@ tb_print_boot_menu()
 #
 tb_boot_tbe()
 {
-	tbe=${1} use_klibc=${2:-}
+	tbe=${1}
 
 	config=${TB_DIR}/${tbe}/config.txt
 
@@ -255,8 +263,11 @@ tb_boot_tbe()
 		return 1
 	fi
 
+	# Copy the selected TBE's config.txt
 	cp "${config}" "${FW_DIR}"/tryboot.txt
-	if [ "${use_klibc}" = "use_klibc" ] ; then
+
+	# Use klibc's reboot if we're running in the initrd
+	if tb_in_initrd ; then
 		/usr/lib/klibc/bin/reboot "0 tryboot"
 	else
 		reboot "0 tryboot"

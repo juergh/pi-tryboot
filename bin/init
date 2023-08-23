@@ -83,4 +83,4 @@ echo
 echo "-- Reboot into ${tbe}"
 echo
 
-tb_boot_tbe "${tbe}" use_klibc
+tb_boot_tbe "${tbe}"
