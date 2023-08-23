@@ -126,7 +126,23 @@ tb_tbe_exists()
 #
 tb_print_tbe_list()
 {
-	for tbe_dir in "${TB_DIR}"/* ; do
+	{
+		# Kernels first (reverse sorted, i.e., highest version first)
+		for f in "${TB_DIR}"/* ; do
+			case "${f}" in
+				*/[0-9]*) echo "${f}" ;;
+				*)        true ;;
+			esac
+		done | sort -Vr
+
+		# Anything else (regularly sorted)
+		for f in "${TB_DIR}"/* ; do
+			case "${f}" in
+				*/[0-9]*) true ;;
+				*)        echo "${f}" ;;
+			esac
+		done | sort
+	} | while read -r tbe_dir ; do
 		tbe=${tbe_dir##*/}
 		if [ -e "${tbe_dir}"/config.txt ] ; then
 			echo "${tbe}"
