@@ -40,6 +40,7 @@ done
 if [ -z "${tbe}" ] ; then
 	echo "-- Update all tryboot entries"
 	tb_update_all_tbes
+	tb_print_config > "${TB_DIR}"/tryboot.cfg
 	exit
 fi
 
@@ -51,3 +52,4 @@ fi
 
 echo "-- Update tryboot entry: ${tbe}"
 tb_update_tbe "${tbe}"
+tb_print_config > "${TB_DIR}"/tryboot.cfg
