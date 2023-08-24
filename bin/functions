@@ -187,6 +187,19 @@ tb_source_tryboot_cfg()
 
 	# shellcheck disable=SC1091
 	. "${TB_DIR}"/tryboot.cfg
+
+	# Get the saved default TBE
+	tbe_default=$(tb_print_default_tbe)
+
+	# Determine the index of the default TBE
+	TB_MENU_ENTRY_DEFAULT=1
+	for idx in ${TB_MENU_ENTRIES} ; do
+		TB_MENU_ENTRY_"${idx}"
+		if [ "${TB_MENU_TITLE}" = "${tbe_default}" ] ; then
+			TB_MENU_ENTRY_DEFAULT=${idx}
+			break
+		fi
+	done
 }
 
 # ----------------------------------------------------------------------------
@@ -233,35 +246,9 @@ tb_print_tbe_list()
 }
 
 #
-# Return the TBE for the provided index
-#
-tb_print_tbe_from_index()
-{
-	idx=${1}
-
-	if [ "${idx}" -gt 0 ] 2>/dev/null ; then
-		tb_print_tbe_list | sed -n "${idx}p"
-	fi
-}
-
-#
-# Return the default TBE
-#
-tb_print_default_tbe()
-{
-	tbe=$(tb_print_saved_default_tbe)
-	if tb_tbe_exists "${tbe}" ; then
-		echo "${tbe}"
-	else
-		# No saved default TBE, so use the first in the list
-		tb_print_tbe_from_index 1
-	fi
-}
-
-#
 # Return the saved default TBE
 #
-tb_print_saved_default_tbe()
+tb_print_default_tbe()
 {
 	if [ -e "${TB_DIR}"/default ] ; then
 		cat "${TB_DIR}"/default
@@ -299,9 +286,6 @@ tb_print_boot_menu()
 	# Source tryboot.cfg
 	tb_source_tryboot_cfg
 
-	# Get the default TBE
-	tbe_default=$(tb_print_default_tbe)
-
 	echo "------------------------------------------------------------"
 	echo "    Idx   Entry"
 	echo "------------------------------------------------------------"
@@ -311,7 +295,7 @@ tb_print_boot_menu()
 		TB_MENU_ENTRY_"${idx}"
 
 		# Mark the default entry
-		if [ "${TB_MENU_TITLE}" = "${tbe_default}" ] ; then
+		if [ "${idx}" = "${TB_MENU_ENTRY_DEFAULT}" ] ; then
 			def="*"
 		else
 			def=" "
@@ -338,6 +322,11 @@ tb_exec_boot_menu_entry()
 
 	# Source tryboot.cfg
 	tb_source_tryboot_cfg
+
+	# Use the default
+	if [ -z "${idx}" ] ; then
+		idx=${TB_MENU_ENTRY_DEFAULT}
+	fi
 
 	# Call the menu entry function from tryboot.cfg
 	if ! TB_MENU_ENTRY_"${idx}" 2>/dev/null ; then
