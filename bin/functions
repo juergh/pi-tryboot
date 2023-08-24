@@ -115,6 +115,64 @@ tb_in_initrd()
 	test -d /scripts
 }
 
+#
+# Print the list of available hook scripts
+#
+tb_print_hook_list()
+{
+	for f in "${PKG_DIR}"/hooks/* ; do
+		if [ -x "${f}" ] ; then
+			echo "${f}"
+		fi
+	done | sort -u
+}
+
+#
+# Print the tryboot bootloader configuration
+#
+tb_print_config()
+{
+	# The list of menu entry indeces
+	tbe_idxs=$(tb_print_tbe_list | nl -w 1 -s " " | sed -e "s, .*,,")
+	hook_idxs=$(tb_print_hook_list | sed -e "s,.*/,," -e "s,-.*,,")
+	cat <<EOF
+TB_MENU_ENTRIES="${tbe_idxs} ${hook_idxs}"
+
+EOF
+
+	# 'Reguar' TBE boot menu entries
+	idx=0
+	tb_print_tbe_list | while read -r tbe ; do
+		idx=$((idx + 1))
+		cat <<EOF
+TB_MENU_ENTRY_${idx}()
+{
+    TB_MENU_TITLE="${tbe}"
+    TB_MENU_FUNC()
+    {
+        tb_boot_tbe "${tbe}"
+    }
+}
+
+EOF
+	done
+
+	# Hook menu entries
+	tb_print_hook_list | while read -r hook ; do
+		idx=${hook##*/}
+		idx=${idx%%-*}
+		cat <<EOF
+TB_MENU_ENTRY_${idx}()
+{
+EOF
+		sed 's/^/    /' "${hook}"
+		cat <<EOF
+}
+
+EOF
+	done
+}
+
 # ----------------------------------------------------------------------------
 # TBE inventory helpers
 
