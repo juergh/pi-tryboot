@@ -57,6 +57,9 @@ tb_inited()
 tb_init()
 {
 	if ! tb_inited ; then
+		# Create the tryboot root directory
+		mkdir -p "${TB_DIR}"
+
 		# Back up the original config.txt
 		cp "${FW_DIR}"/config.txt "${TB_DIR}"/
 
