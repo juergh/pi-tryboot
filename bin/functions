@@ -48,7 +48,7 @@ tb_trap_exit()
 #
 tb_inited()
 {
-	test -e "${FW_DIR}"/config.orig.txt
+	test -e "${TB_DIR}"/config.txt
 }
 
 #
@@ -58,7 +58,7 @@ tb_init()
 {
 	if ! tb_inited ; then
 		# Back up the original config.txt
-		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+		cp "${FW_DIR}"/config.txt "${TB_DIR}"/
 
 		# Set the default commandline
 		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
@@ -90,7 +90,7 @@ tb_enable()
 tb_disable()
 {
 	if tb_enabled ; then
-		cp "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
+		cp "${TB_DIR}"/config.txt "${FW_DIR}"/
 	fi
 }
 
