@@ -1,21 +1,19 @@
 #!/bin/bash -eu
 #
-# Update tryboot entries
+# Update tryboot entries and generate tryboot.cfg
 #
 
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h] [TBE]
+Usage: $(basename "${0}") [-h]
 
-Update tryboot entries (TBEs).
+Update tryboot entries (TBEs) and generate tryboot configuration file.
 
 Optional arguments:
   -h, --help  Show this help text and exit.
 EOF
 }
-
-tbe=
 
 while [ ${#} -ne 0 ] ; do
 	case "${1}" in
@@ -24,32 +22,19 @@ while [ ${#} -ne 0 ] ; do
 			exit
 			;;
 		*)
-			if [ -n "${tbe}" ] ; then
-				echo "Invalid argument: ${1}" >&2
-				exit 2
-			fi
-			tbe=${1}
+			echo "Invalid argument: ${1}" >&2
+			exit 2
 			;;
 	esac
+	# shellcheck disable=2317
 	shift
 done
 
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/functions
 
-if [ -z "${tbe}" ] ; then
-	echo "-- Update all tryboot entries"
-	tb_update_all_tbes
-	tb_print_config > "${TB_DIR}"/tryboot.cfg
-	exit
-fi
+echo "-- Update tryboot entries"
+tb_update_all_tbes
 
-if ! tb_tbe_exists "${tbe}" ; then
-	echo "-- No such tryboot entry: ${tbe}" >&2
-	tb_untrap_exit
-	exit 1
-fi
-
-echo "-- Update tryboot entry: ${tbe}"
-tb_update_tbe "${tbe}"
+echo "-- Generate tryboot.cfg"
 tb_print_config > "${TB_DIR}"/tryboot.cfg

@@ -57,6 +57,7 @@ if [ ${remove} -eq 1 ] ; then
 	if tb_tbe_exists "${tbe}" ; then
 	   echo "-- Remove tryboot entry: ${tbe}"
 	   tb_remove_tbe "${tbe}"
+	   tryboot-update
 	   exit
 	fi
 	echo "-- No such tryboot entry: ${tbe}" >&2
@@ -66,6 +67,4 @@ fi
 
 echo "-- Install tryboot entry: ${tbe}"
 tb_install_tbe "${tbe}"
-
-# Update the TBE
-tryboot-update "${tbe}"
+tryboot-update
