@@ -1,0 +1,46 @@
+#!/bin/bash -eu
+#
+# Generate a tryboot configuration file
+#
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] [-o FILE]
+
+Generate a tryboot configuration file.
+
+Optional arguments:
+  -h, --help         Show this help text and exit.
+  -o, --output FILE  Save generated config to FILE.
+EOF
+}
+
+outfile=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		-o|--output)
+			shift
+			outfile=${1}
+			;;
+		*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
+	esac
+	shift
+done
+
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/functions
+
+if [ -n "${outfile}" ] ; then
+	tb_print_config > "${outfile}"
+else
+	tb_print_config
+fi
