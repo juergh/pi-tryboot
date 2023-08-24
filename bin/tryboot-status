@@ -16,7 +16,5 @@ else
 	echo "-- Tryboot bootloader is disabled"
 fi
 
-echo "-- Current default TBE is $(tb_print_default_tbe)"
-
-saved=$(tb_print_saved_default_tbe)
+saved=$(tb_print_default_tbe)
 echo "-- Saved default TBE is ${saved:-unset}"
