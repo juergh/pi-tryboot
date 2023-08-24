@@ -34,9 +34,10 @@ done
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/functions
 
-tb_print_boot_menu
-
-cat <<EOF
+while true; do
+	echo
+	tb_print_boot_menu
+	cat <<EOF
 
 Press ENTER to boot the default TBE (*).
 Enter the index number to boot the corresponding TBE.
@@ -44,24 +45,14 @@ Enter 'x' or 'q' to exit.
 
 EOF
 
-tbe=
-while [ -z "${tbe}" ] ; do
 	printf "Choice: "
 	read -r idx
-	case "${idx,,}" in
+	case "${idx}" in
 		x|q)
 			exit
 			;;
-		"")
-			tbe=$(tb_print_default_tbe)
-			;;
 		*)
-			tbe=$(tb_print_tbe_from_index "${idx}")
+			tb_exec_boot_menu_entry "${idx}" || true
 			;;
 	esac
 done
-
-echo
-echo "-- Reboot into ${tbe}"
-
-tb_boot_tbe "${tbe}"

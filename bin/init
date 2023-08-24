@@ -53,34 +53,17 @@ mount "${boot_part}" /boot
 # shellcheck disable=SC1091
 . /scripts/functions
 
-tbe=
-while [ -z "${tbe}" ] ; do
-	  tb_print_boot_menu initrd
-
-	  cat <<EOF
+while true ; do
+	echo
+	tb_print_boot_menu
+	cat <<EOF
 
 Press ENTER to boot the default TBE (*).
 Enter the index number to boot (or execute) the corresponding TBE.
 
 EOF
 
-	  printf "Choice: "
-	  read -r idx
-	  case "${idx}" in
-		  90)
-			  /bin/sh
-			  ;;
-		  "")
-			  tbe=$(tb_print_default_tbe)
-			  ;;
-		  *)
-			  tbe=$(tb_print_tbe_from_index "${idx}")
-			  ;;
-	  esac
+	printf "Choice: "
+	read -r idx
+	tb_exec_boot_menu_entry "${idx}"
 done
-
-echo
-echo "-- Reboot into ${tbe}"
-echo
-
-tb_boot_tbe "${tbe}"

@@ -150,7 +150,7 @@ EOF
 TB_MENU_ENTRY_${idx}()
 {
     TB_MENU_TITLE="${tbe}"
-    TB_MENU_FUNC()
+    TB_MENU_EXEC()
     {
         tb_boot_tbe "${tbe}"
     }
@@ -173,6 +173,20 @@ EOF
 
 EOF
 	done
+}
+
+#
+# Source tryboot.cfg
+#
+tb_source_tryboot_cfg()
+{
+	if [ -n "${TB_MENU_ENTRIES:-}" ]  ; then
+		# Already sourced
+		return
+	fi
+
+	# shellcheck disable=SC1091
+	. "${TB_DIR}"/tryboot.cfg
 }
 
 # ----------------------------------------------------------------------------
@@ -282,31 +296,57 @@ tb_clear_default_tbe()
 #
 tb_print_boot_menu()
 {
-	initrd=${1:-}
+	# Source tryboot.cfg
+	tb_source_tryboot_cfg
+
+	# Get the default TBE
 	tbe_default=$(tb_print_default_tbe)
 
 	echo "------------------------------------------------------------"
 	echo "    Idx   Entry"
 	echo "------------------------------------------------------------"
 
-	idx=1
-	tb_print_tbe_list | while read -r tbe ; do
-		if [ "${tbe}" = "${tbe_default}" ] ; then
+	for idx in ${TB_MENU_ENTRIES} ; do
+		# Call the menu entry function from tryboot.cfg
+		TB_MENU_ENTRY_"${idx}"
+
+		# Mark the default entry
+		if [ "${TB_MENU_TITLE}" = "${tbe_default}" ] ; then
 			def="*"
 		else
 			def=" "
 		fi
 
-		printf "%s   %3d   %s\n" "${def}" "${idx}" "${tbe}"
-		idx=$((idx + 1))
+		# Add a visual separator
+		if [ "${idx%0}" != "${idx}" ] ; then
+			echo
+		fi
+
+		# Print the menu entry
+		printf "%s   %3d   %s\n" "${def}" "${idx}" "${TB_MENU_TITLE}"
 	done
 
-	if [ "${initrd}" = "initrd" ] ; then
-		echo
-		echo "     90   Run a shell"
+	echo "------------------------------------------------------------"
+}
+
+#
+# Execute a boot menu entry
+#
+tb_exec_boot_menu_entry()
+{
+	idx=${1}
+
+	# Source tryboot.cfg
+	tb_source_tryboot_cfg
+
+	# Call the menu entry function from tryboot.cfg
+	if ! TB_MENU_ENTRY_"${idx}" 2>/dev/null ; then
+		echo "-- Invalid index: ${idx}" >&2
+		return 1
 	fi
 
-	echo "------------------------------------------------------------"
+	# Execute the menu entry
+	TB_MENU_EXEC
 }
 
 #
@@ -315,7 +355,6 @@ tb_print_boot_menu()
 tb_boot_tbe()
 {
 	tbe=${1}
-
 	config=${TB_DIR}/${tbe}/config.txt
 
 	if ! [ -e "${config}" ] ; then
