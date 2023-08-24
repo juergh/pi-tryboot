@@ -7,23 +7,15 @@ dest_dir=${1:-}
 
 etc_dir="${dest_dir}"/etc
 bin_dir="${dest_dir}"/usr/bin
-lib_tb_dir="${dest_dir}"/usr/lib/rpi-tryboot
-
-# Install firmware files
-mkdir -p "${lib_tb_dir}"/tryboot
-cp buildd/initrd.img "${lib_tb_dir}"/tryboot/
-cp -r firmware/boot/firmware/* "${lib_tb_dir}"/tryboot/
-find "${lib_tb_dir}"/tryboot -type f -exec chmod 644 {} +
+lib_dir="${dest_dir}"/usr/lib/rpi-tryboot
 
 # Install scripts
 mkdir -p "${bin_dir}"
 cp bin/tryboot-* "${bin_dir}"/
 
-
 # Install helper library and hook scripts
-mkdir -p "${lib_tb_dir}"/hooks/
-cp bin/functions "${lib_tb_dir}"/
-cp hooks/* "${lib_tb_dir}"/hooks/
+mkdir -p "${lib_dir}"
+cp bin/functions "${lib_dir}"/
 
 # Install config files
 mkdir -p "${etc_dir}"/default/tryboot.d "${etc_dir}"/tryboot.d

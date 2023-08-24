@@ -10,3 +10,9 @@ Architecture: all
 Depends: ${misc:Depends}
 Description: Raspberry Pi tryboot bootloader
  Raspberry Pi tryboot bootloader
+
+Package: rpi-tryboot-firmware
+Architecture: all
+Depends: ${misc:Depends}, rpi-tryboot
+Description: Raspberry Pi tryboot bootloader firmware
+ Raspberry Pi tryboot bootloader firmware

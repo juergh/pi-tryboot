@@ -20,6 +20,7 @@ install-indep:
 
 	# Install the tryboot files
 	bin/install debian/rpi-tryboot
+	bin/install-firmware debian/rpi-tryboot-firmware
 
 	dh_installchangelogs
 	dh_installdocs
