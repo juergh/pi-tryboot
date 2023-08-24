@@ -15,10 +15,15 @@ cp buildd/initrd.img "${lib_tb_dir}"/tryboot/
 cp -r firmware/boot/firmware/* "${lib_tb_dir}"/tryboot/
 find "${lib_tb_dir}"/tryboot -type f -exec chmod 644 {} +
 
-# Install scripts and helper library
+# Install scripts
 mkdir -p "${bin_dir}"
-cp bin/tryboot-* "${bin_dir}"
-cp bin/functions "${lib_tb_dir}"
+cp bin/tryboot-* "${bin_dir}"/
+
+
+# Install helper library and hook scripts
+mkdir -p "${lib_tb_dir}"/hooks/
+cp bin/functions "${lib_tb_dir}"/
+cp hooks/* "${lib_tb_dir}"/hooks/
 
 # Install config files
 mkdir -p "${etc_dir}"/default/tryboot.d "${etc_dir}"/tryboot.d
