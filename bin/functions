@@ -133,14 +133,16 @@ tb_print_hook_list()
 tb_print_config()
 {
 	# The list of menu entry indeces
-	tbe_idxs=$(tb_print_tbe_list | nl -w 1 -s " " | sed -e "s, .*,,")
-	hook_idxs=$(tb_print_hook_list | sed -e "s,.*/,," -e "s,-.*,,")
+	tbe_idxs=$(tb_print_tbe_list | nl -w 1 -s " " | sed -e "s, .*,," | \
+	           tr "\n" " ")
+	hook_idxs=$(tb_print_hook_list | sed -e "s,.*/,," -e "s,-.*,," | \
+	            tr "\n" " ")
 	cat <<EOF
-TB_MENU_ENTRIES="${tbe_idxs} ${hook_idxs}"
+TB_MENU_ENTRIES="${tbe_idxs% } ${hook_idxs% }"
 
 EOF
 
-	# 'Reguar' TBE boot menu entries
+	# 'Regular' TBE boot menu entries
 	idx=0
 	tb_print_tbe_list | while read -r tbe ; do
 		idx=$((idx + 1))
