@@ -236,7 +236,7 @@ EOF
 #
 tb_source_tryboot_cfg()
 {
-	if [ -n "${TB_MENU_ENTRY_DEFAULT_IDX:-}" ]  ; then
+	if [ -n "${__TB_MENU_DEFAULT_IDX:-}" ]  ; then
 		# Already sourced
 		return
 	fi
@@ -247,8 +247,8 @@ tb_source_tryboot_cfg()
 	# Get the saved default TBE
 	tbe_default=$(tb_print_default_tbe)
 
-	TB_MENU_ENTRY_FIRST_TBE=
-	TB_MENU_ENTRY_DEFAULT_IDX=1
+	__TB_MENU_FIRST_TBE=
+	__TB_MENU_DEFAULT_IDX=1
 
 	# Parse all menu entries
 	for idx in ${TB_MENU_ENTRIES} ; do
@@ -256,12 +256,12 @@ tb_source_tryboot_cfg()
 
 		# The first TBE
 		if [ "${idx}" = "1" ] ; then
-			TB_MENU_ENTRY_FIRST_TBE=${TB_MENU_ENTRY_TITLE}
+			__TB_MENU_FIRST_TBE=${TB_MENU_TITLE}
 		fi
 
 		# The default TBE index
 		if [ "${TB_MENU_TITLE}" = "${tbe_default}" ] ; then
-			TB_MENU_ENTRY_DEFAULT_IDX=${idx}
+			__TB_MENU_DEFAULT_IDX=${idx}
 		fi
 	done
 }
@@ -317,7 +317,7 @@ tb_print_first_tbe()
 	# Source tryboot.cfg
 	tb_source_tryboot.cfg
 
-	echo "${TB_MENU_ENTRY_FIRST_TBE}"
+	echo "${__TB_MENU_FIRST_TBE}"
 }
 
 #
@@ -370,7 +370,7 @@ tb_print_boot_menu()
 		TB_MENU_ENTRY_"${idx}"
 
 		# Mark the default entry
-		if [ "${idx}" = "${TB_MENU_ENTRY_DEFAULT_IDX}" ] ; then
+		if [ "${idx}" = "${__TB_MENU_DEFAULT_IDX}" ] ; then
 			def="*"
 		else
 			def=" "
@@ -400,7 +400,7 @@ tb_exec_boot_menu_entry()
 
 	# Use the default
 	if [ -z "${idx}" ] ; then
-		idx=${TB_MENU_ENTRY_DEFAULT_IDX}
+		idx=${__TB_MENU_DEFAULT_IDX}
 	fi
 
 	# Call the menu entry function from tryboot.cfg
