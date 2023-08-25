@@ -602,6 +602,16 @@ tb_remove_tbe()
 	rm -rf "${tbe_dir}"
 }
 
+#
+# Purge everything and restore the original state
+#
+tb_purge_all()
+{
+	mv "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
+	rm -f "${FW_DIR}"/tryboot.txt
+	rm -rf "${TB_DIR}"
+}
+
 # ----------------------------------------------------------------------------
 # Main entry point
 #

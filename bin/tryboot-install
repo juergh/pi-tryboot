@@ -6,7 +6,7 @@
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h] [-r] TBE
+Usage: $(basename "${0}") [-h] [-r] [--purge] TBE
 
 Install a tryboot entry (TBE).
 
@@ -19,10 +19,12 @@ Positional arguments:
 Optional arguments:
   -h, --help    Show this help text and exit.
   -r, --remove  Remove the TBE.
+  --purge       DO NOT USE. Purge everything and restore the original state.
 EOF
 }
 
 remove=0
+purge=0
 tbe=
 
 while [ ${#} -ne 0 ] ; do
@@ -33,6 +35,9 @@ while [ ${#} -ne 0 ] ; do
 			;;
 		-r|--remove)
 			remove=1
+			;;
+		--purge)
+			purge=1
 			;;
 		*)
 			if [ -n "${tbe}" ] ; then
@@ -45,13 +50,18 @@ while [ ${#} -ne 0 ] ; do
 	shift
 done
 
-if [ -z "${tbe}" ] ; then
+if [ -z "${tbe}" ] && [ ${purge} -eq 0 ] ; then
 	usage
 	exit 2
 fi
 
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/functions
+
+if [ ${purge} -eq 1 ] ; then
+	tb_purge_all
+	exit
+fi
 
 if [ ${remove} -eq 1 ] ; then
 	if tb_tbe_exists "${tbe}" ; then
