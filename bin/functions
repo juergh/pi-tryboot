@@ -315,7 +315,7 @@ tb_print_tbe_list()
 tb_print_first_tbe()
 {
 	# Source tryboot.cfg
-	tb_source_tryboot.cfg
+	tb_source_tryboot_cfg
 
 	echo "${__TB_MENU_FIRST_TBE}"
 }
