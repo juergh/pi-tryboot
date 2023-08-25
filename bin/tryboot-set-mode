@@ -12,7 +12,7 @@ Set the tryboot bootloader mode.
 
 Positional arguments:
   MODE  TBE   Bootloader mode:
-                disable:
+                disabled:
                 simple:
                 tryboot:
 
@@ -29,7 +29,7 @@ while [ ${#} -ne 0 ] ; do
 			usage
 			exit
 			;;
-		disable|simple|tryboot)
+		disabled|simple|tryboot)
 			if [ -n "${mode}" ] ; then
 				echo "Invalid argument: ${1}" >&2
 				exit 2

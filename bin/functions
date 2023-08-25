@@ -89,7 +89,7 @@ tb_set_mode()
 	mode=${1}
 
 	case "${mode}" in
-		disable)
+		disabled)
 			# Restore the original config.txt and clear the default TBE
 			cp "${TB_DIR}"/config.txt "${FW_DIR}"/
 			tb_clear_default_tbe
