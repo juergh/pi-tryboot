@@ -88,6 +88,29 @@ tb_set_mode()
 {
 	mode=${1}
 
+	case "${mode}" in
+		disable)
+			# Restore the original config.txt and clear the default TBE
+			cp "${TB_DIR}"/config.txt "${FW_DIR}"/
+			tb_clear_default_tbe
+			;;
+		simple)
+			# Use the config.txt from the first TBE as the main config.txt and
+			# set the default TBE to that as well
+			tbe=$(tb_print_first_tbe)
+			cp "${TB_DIR}"/"${tbe}"/config.txt "${FW_DIR}"/config.txt
+			tb_set_default_tbe "${tbe}"
+			;;
+		tryboot)
+			true
+			;;
+		*)
+			echo "-- Invalid mode: ${mode}" >&2
+			return 1
+			;;
+	esac
+
+	# Save the mode
 	echo "${mode}" > "${TB_DIR}"/mode
 }
 
@@ -213,7 +236,7 @@ EOF
 #
 tb_source_tryboot_cfg()
 {
-	if [ -n "${TB_MENU_ENTRIES:-}" ]  ; then
+	if [ -n "${TB_MENU_ENTRY_DEFAULT_IDX:-}" ]  ; then
 		# Already sourced
 		return
 	fi
@@ -224,13 +247,21 @@ tb_source_tryboot_cfg()
 	# Get the saved default TBE
 	tbe_default=$(tb_print_default_tbe)
 
-	# Determine the index of the default TBE
-	TB_MENU_ENTRY_DEFAULT=1
+	TB_MENU_ENTRY_FIRST_TBE=
+	TB_MENU_ENTRY_DEFAULT_IDX=1
+
+	# Parse all menu entries
 	for idx in ${TB_MENU_ENTRIES} ; do
 		TB_MENU_ENTRY_"${idx}"
+
+		# The first TBE
+		if [ "${idx}" = "1" ] ; then
+			TB_MENU_ENTRY_FIRST_TBE=${TB_MENU_ENTRY_TITLE}
+		fi
+
+		# The default TBE index
 		if [ "${TB_MENU_TITLE}" = "${tbe_default}" ] ; then
-			TB_MENU_ENTRY_DEFAULT=${idx}
-			break
+			TB_MENU_ENTRY_DEFAULT_IDX=${idx}
 		fi
 	done
 }
@@ -250,7 +281,7 @@ tb_tbe_exists()
 }
 
 #
-# Return the list of bootable TBEs
+# Print the list of bootable TBEs
 #
 tb_print_tbe_list()
 {
@@ -279,7 +310,18 @@ tb_print_tbe_list()
 }
 
 #
-# Return the saved default TBE
+# Print the first TBE
+#
+tb_print_first_tbe()
+{
+	# Source tryboot.cfg
+	tb_source_tryboot.cfg
+
+	echo "${TB_MENU_ENTRY_FIRST_TBE}"
+}
+
+#
+# Print the saved default TBE
 #
 tb_print_default_tbe()
 {
@@ -328,7 +370,7 @@ tb_print_boot_menu()
 		TB_MENU_ENTRY_"${idx}"
 
 		# Mark the default entry
-		if [ "${idx}" = "${TB_MENU_ENTRY_DEFAULT}" ] ; then
+		if [ "${idx}" = "${TB_MENU_ENTRY_DEFAULT_IDX}" ] ; then
 			def="*"
 		else
 			def=" "
@@ -358,7 +400,7 @@ tb_exec_boot_menu_entry()
 
 	# Use the default
 	if [ -z "${idx}" ] ; then
-		idx=${TB_MENU_ENTRY_DEFAULT}
+		idx=${TB_MENU_ENTRY_DEFAULT_IDX}
 	fi
 
 	# Call the menu entry function from tryboot.cfg
