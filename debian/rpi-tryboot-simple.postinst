@@ -5,7 +5,7 @@ set -e
 case "$1" in
 	configure)
 		tryboot-init
-		tryboot-install tryboot
+		tryboot-update
 		;;
 esac
 

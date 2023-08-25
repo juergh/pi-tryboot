@@ -5,14 +5,14 @@ Maintainer: Juerg Haefliger <juergh@proton.me>
 Build-Depends: debhelper (>= 11), rsync
 Standards-Version: 4.1.3
 
-Package: rpi-tryboot
+Package: rpi-tryboot-simple
 Architecture: all
 Depends: ${misc:Depends}
+Description: Raspberry Pi tryboot bootloader (simple)
+ Raspberry Pi tryboot bootloader (simple)
+
+Package: rpi-tryboot
+Architecture: all
+Depends: ${misc:Depends}, rpi-tryboot-simple
 Description: Raspberry Pi tryboot bootloader
  Raspberry Pi tryboot bootloader
-
-Package: rpi-tryboot-firmware
-Architecture: all
-Depends: ${misc:Depends}, rpi-tryboot
-Description: Raspberry Pi tryboot bootloader firmware
- Raspberry Pi tryboot bootloader firmware

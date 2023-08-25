@@ -19,8 +19,8 @@ install-indep:
 	dh_prep
 
 	# Install the tryboot files
-	bin/install debian/rpi-tryboot
-	bin/install-firmware debian/rpi-tryboot-firmware
+	bin/install rpi-tryboot-simple
+	bin/install rpi-tryboot
 
 	dh_installchangelogs
 	dh_installdocs
