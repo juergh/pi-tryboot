@@ -1,0 +1,56 @@
+#!/bin/bash -eu
+#
+# Set tryboot bootloader mode
+#
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] MODE
+
+Set the tryboot bootloader mode.
+
+Positional arguments:
+  MODE  TBE   Bootloader mode:
+                disable:
+                simple:
+                tryboot:
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+mode=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		disable|simple|tryboot)
+			if [ -n "${mode}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			mode=${1}
+			;;
+		*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
+	esac
+	shift
+done
+
+if [ -z "${mode}" ] ; then
+	usage
+	exit 2
+fi
+
+# shellcheck disable=SC1091
+. /usr/lib/rpi-tryboot/functions
+
+echo "-- Set tryboot bootloader mode: ${mode}"
+tb_set_mode "${mode}"

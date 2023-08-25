@@ -48,7 +48,7 @@ tb_trap_exit()
 #
 tb_inited()
 {
-	test -e "${TB_DIR}"/config.txt
+	test -d "${TB_DIR}"
 }
 
 #
@@ -60,13 +60,43 @@ tb_init()
 		# Create the tryboot root directory
 		mkdir -p "${TB_DIR}"
 
-		# Back up the original config.txt
+		# Back up the original config.txt (twice, just in case)
 		cp "${FW_DIR}"/config.txt "${TB_DIR}"/
+		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
 
 		# Set the default commandline
 		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
 		sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
+
+		# Set the default mode
+		tb_set_mode simple
 	fi
+}
+
+#
+# Print the current bootloader mode (simple or tryboot)
+#
+tb_print_mode()
+{
+	cat "${TB_DIR}"/mode
+}
+
+#
+# Set bootloader mode
+#
+tb_set_mode()
+{
+	mode=${1}
+
+	echo "${mode}" > "${TB_DIR}"/mode
+}
+
+#
+# Clear bootloader mode
+#
+tb_clear_mode()
+{
+	rm -f "${TB_DIR}"/mode
 }
 
 #

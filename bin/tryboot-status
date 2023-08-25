@@ -3,18 +3,8 @@
 # shellcheck disable=SC1091
 . /usr/lib/rpi-tryboot/functions
 
-if tb_inited ; then
-	echo "-- Tryboot bootloader is initialized"
-else
-	echo "-- Tryboot bootloader is uninitialized"
-	exit
-fi
-
-if tb_enabled ; then
-	echo "-- Tryboot bootloader is enabled"
-else
-	echo "-- Tryboot bootloader is disabled"
-fi
+mode=$(tb_print_mode)
+echo "Bootloader mode is ${mode:-unset}"
 
 saved=$(tb_print_default_tbe)
-echo "-- Saved default TBE is ${saved:-unset}"
+echo "Saved default TBE is ${saved:-unset}"
