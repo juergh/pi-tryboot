@@ -68,8 +68,11 @@ tb_init()
 		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
 		sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
 
+		# Generate a dummy tryboot.cfg config file
+		tb_print_config > "${TB_DIR}"/tryboot.cfg
+
 		# Set the default mode
-		tb_set_mode simple
+		tb_set_mode disabled
 	fi
 }
 
