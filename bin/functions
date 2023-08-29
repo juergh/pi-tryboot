@@ -56,101 +56,37 @@ tb_inited()
 #
 tb_init()
 {
-	if ! tb_inited ; then
-		# Create the tryboot root directory
-		mkdir -p "${TB_DIR}"
-
-		# Back up the original config.txt (twice, just in case)
-		cp "${FW_DIR}"/config.txt "${TB_DIR}"/
-		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
-
-		# Set the default commandline
-		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
-		sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
-
-		# Generate a dummy tryboot.cfg config file
-		tb_print_config > "${TB_DIR}"/tryboot.cfg
-
-		# Set the default mode
-		tb_set_mode disabled
+	if tb_inited ; then
+		# Already initialized
+		return
 	fi
+
+	# Create the tryboot root directory
+	mkdir -p "${TB_DIR}"
+
+	# Back up the original config.txt (twice, just in case)
+	cp "${FW_DIR}"/config.txt "${TB_DIR}"/
+	cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+
+	# Set the default commandline
+	cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
+	sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
+
+	# Install the highest kernel and make it the default
+	tbe=$(tb_print_highest_kernel)
+	tb_install_tbe "${tbe}"
+	tb_set_default_tbe "${tbe}"
+
+	# Create the tryboot.cfg config file
+	tb_create_tryboot_cfg
 }
 
 #
-# Print the current bootloader mode (simple or tryboot)
+# Print the highest installed kernel version
 #
-tb_print_mode()
+tb_print_highest_kernel()
 {
-	cat "${TB_DIR}"/mode
-}
-
-#
-# Set bootloader mode
-#
-tb_set_mode()
-{
-	mode=${1}
-
-	case "${mode}" in
-		disabled)
-			# Restore the original config.txt and clear the default TBE
-			cp "${TB_DIR}"/config.txt "${FW_DIR}"/
-			tb_clear_default_tbe
-			;;
-		simple)
-			# Use the config.txt from the first TBE as the main config.txt and
-			# set the default TBE to that as well
-			tbe=$(tb_print_first_tbe)
-			cp "${TB_DIR}"/"${tbe}"/config.txt "${FW_DIR}"/config.txt
-			tb_set_default_tbe "${tbe}"
-			;;
-		tryboot)
-			true
-			;;
-		*)
-			echo "-- Invalid mode: ${mode}" >&2
-			return 1
-			;;
-	esac
-
-	# Save the mode
-	echo "${mode}" > "${TB_DIR}"/mode
-}
-
-#
-# Clear bootloader mode
-#
-tb_clear_mode()
-{
-	rm -f "${TB_DIR}"/mode
-}
-
-#
-# Check if tryboot bootloader is enabled
-#
-tb_enabled()
-{
-	grep -q "# RPI-TRYBOOT" "${FW_DIR}"/config.txt
-}
-
-#
-# Enable tryboot bootloader
-#
-tb_enable()
-{
-	if ! tb_enabled ; then
-		cp "${FW_DIR}"/tryboot/tryboot/config.txt "${FW_DIR}"/config.txt
-	fi
-}
-
-#
-# Disable tryboot bootloader
-#
-tb_disable()
-{
-	if tb_enabled ; then
-		cp "${TB_DIR}"/config.txt "${FW_DIR}"/
-	fi
+	find "${BOOT_DIR}"/vmlinuz-* | sort -Vr | head -1 | sed 's,.*/vmlinuz-,,'
 }
 
 #
@@ -164,14 +100,6 @@ tb_source_etc_default_configs()
 			. "${cfg}"
 		fi
 	done
-}
-
-#
-# Check if running in the initrd
-#
-tb_in_initrd()
-{
-	test -d /scripts
 }
 
 #
@@ -232,6 +160,14 @@ EOF
 
 EOF
 	done
+}
+
+#
+# Create tryboot.cfg
+#
+tb_create_tryboot_cfg()
+{
+	tb_print_config > "${TB_DIR}"/tryboot.cfg
 }
 
 #
@@ -310,17 +246,6 @@ tb_print_tbe_list()
 			echo "${tbe}"
 		fi
 	done
-}
-
-#
-# Print the first TBE
-#
-tb_print_first_tbe()
-{
-	# Source tryboot.cfg
-	tb_source_tryboot_cfg
-
-	echo "${__TB_MENU_FIRST_TBE}"
 }
 
 #
@@ -433,7 +358,7 @@ tb_boot_tbe()
 	cp "${config}" "${FW_DIR}"/tryboot.txt
 
 	# Use klibc's reboot if we're running in the initrd
-	if tb_in_initrd ; then
+	if test -d /scripts ; then
 		/usr/lib/klibc/bin/reboot "0 tryboot"
 	else
 		reboot "0 tryboot"
