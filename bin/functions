@@ -78,9 +78,6 @@ tb_init()
 	tb_update_tbe "${tbe}"
 	tb_set_default_tbe "${tbe}"
 
-	# Make it the default reboot kernel
-	cp "${TB_DIR}"/"${tbe}"/config.txt "${FW_DIR}"/config.txt
-	
 	# Create the tryboot.cfg config file
 	tb_create_tryboot_cfg
 }
@@ -253,13 +250,11 @@ tb_print_tbe_list()
 }
 
 #
-# Print the saved default TBE
+# Print the default TBE
 #
 tb_print_default_tbe()
 {
-	if [ -e "${TB_DIR}"/default ] ; then
-		cat "${TB_DIR}"/default
-	fi
+	sed -n 's/^# TRYBOOT_ENTRY: //p' "${FW_DIR}"/config.txt
 }
 
 #
@@ -269,17 +264,11 @@ tb_set_default_tbe()
 {
 	tbe=${1}
 
-	if tb_tbe_exists "${tbe}" ; then
-		echo "${tbe}" > "${TB_DIR}"/default
+	if ! tb_tbe_exists "${tbe}" ; then
+		return
 	fi
-}
 
-#
-# Clear the default TBE
-#
-tb_clear_default_tbe()
-{
-	rm -f "${TB_DIR}"/default
+	cp "${TB_DIR}"/"${tbe}"/config.txt "${FW_DIR}"/config.txt
 }
 
 # ----------------------------------------------------------------------------

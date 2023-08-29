@@ -1,6 +1,8 @@
 #
 # RPI-TRYBOOT
 #
+# TRYBOOT_ENTRY: ${TRYBOOT_ENTRY}
+#
 
 [all]
 enable_uart=1
