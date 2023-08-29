@@ -463,24 +463,9 @@ tb_print_tbe_config_txt()
 }
 
 #
-# Update the tryboot TBE (config.txt and cmdline.txt)
+# Update a TBE (config.txt amd cmdline.txt)
 #
-tb_update_tryboot_tbe()
-{
-	tbe_dir=${TB_DIR}/tryboot
-
-	# config.txt
-	tb_print_tbe_config_txt tryboot > "${tbe_dir}"/config.txt
-
-	# cmdline.txt
-	tb_source_etc_default_configs
-	echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
-}
-
-#
-# Update a kernel TBE (config.txt and cmdline.txt)
-#
-tb_update_kernel_tbe()
+tb_update_tbe()
 {
 	tbe=${1}
 	tbe_dir=${TB_DIR}/${tbe}
@@ -490,20 +475,11 @@ tb_update_kernel_tbe()
 
 	# cmdline.txt
 	tb_source_etc_default_configs
-	echo "${TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
-}
-
-#
-# Update a TBE (config.txt amd cmdline.txt)
-#
-tb_update_tbe()
-{
-	tbe=${1}
-
-	case "${tbe}" in
-		tryboot) tb_update_tryboot_tbe ;;
-		*)       tb_update_kernel_tbe "${tbe}" ;;
-	esac
+	if [ "${tbe}" = "tryboot" ] ; then
+		echo "${TRYBOOT_TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
+	else
+		echo "${TRYBOOT_CMDLINE_LINUX}" > "${tbe_dir}"/cmdline.txt
+	fi
 }
 
 #
