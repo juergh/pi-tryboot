@@ -5,7 +5,8 @@
 
 if tb_inited ; then
 	echo "-- Tryboot bootloader is already initialized"
-else
-	tb_init
-	echo "-- Tryboot bootloader initialized"
+	exit 0
 fi
+
+echo "-- Initialize tryboot bootloader"
+tb_init
