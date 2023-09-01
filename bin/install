@@ -31,6 +31,10 @@ case "${pkg_name}" in
 			mkdir -p "${etc_dir}"/kernel/"${d}"
 			cp etc/kernel/"${d}"/* "${etc_dir}"/kernel/"${d}"/
 		done
+
+		# Install initramfs post-update hook
+		mkdir -p "${etc_dir}"/initramfs/post-update.d
+		cp etc/initramfs/post-update.d/* "${etc_dir}"/initramfs/post-update.d/
 		;;
 
 	rpi-tryboot)

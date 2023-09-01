@@ -1,0 +1,14 @@
+!/bin/sh
+
+set -e
+
+# conffile still present, but rpi-tryboot removed
+if ! which tryboot-install >/dev/null 2>&1; then
+	exit 0
+fi
+
+abi="${1}"
+# ignored
+_initrd="${2}"
+
+exec tryboot-install "${abi}"
