@@ -56,7 +56,7 @@ if [ -z "${tbe}" ] && [ ${purge} -eq 0 ] ; then
 fi
 
 # shellcheck disable=SC1091
-. /usr/lib/rpi-tryboot/functions
+. /usr/share/rpi-tryboot/functions
 
 if [ ${purge} -eq 1 ] ; then
 	tb_purge_all

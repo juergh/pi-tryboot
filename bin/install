@@ -6,20 +6,20 @@
 pkg_name=${1}
 dest_dir=debian/${pkg_name}
 
+etc_dir="${dest_dir}"/etc
+bin_dir="${dest_dir}"/usr/bin
+usr_dir="${dest_dir}"/usr/share/rpi-tryboot
+
 case "${pkg_name}" in
 
 	rpi-tryboot-simple)
-		etc_dir="${dest_dir}"/etc
-		bin_dir="${dest_dir}"/usr/bin
-		lib_dir="${dest_dir}"/usr/lib/rpi-tryboot
-
 		# Install scripts
 		mkdir -p "${bin_dir}"
 		cp bin/tryboot-* "${bin_dir}"/
 
 		# Install helper library and hook scripts
-		mkdir -p "${lib_dir}"
-		cp bin/functions "${lib_dir}"/
+		mkdir -p "${usr_dir}"
+		cp bin/functions "${usr_dir}"/
 
 		# Install config files
 		mkdir -p "${etc_dir}"/default/tryboot.d "${etc_dir}"/tryboot.d
@@ -34,17 +34,15 @@ case "${pkg_name}" in
 		;;
 
 	rpi-tryboot)
-		lib_dir="${dest_dir}"/usr/lib/rpi-tryboot
-
 		# Install firmware files
-		mkdir -p "${lib_dir}"/tryboot
-		cp buildd/initrd.img "${lib_dir}"/tryboot/
-		cp -r firmware/boot/firmware/* "${lib_dir}"/tryboot/
-		find "${lib_dir}"/tryboot -type f -exec chmod 644 {} +
+		mkdir -p "${usr_dir}"/tryboot
+		cp buildd/initrd.img "${usr_dir}"/tryboot/
+		cp -r firmware/boot/firmware/* "${usr_dir}"/tryboot/
+		find "${usr_dir}"/tryboot -type f -exec chmod 644 {} +
 
 		# Install hook scripts
-		mkdir -p "${lib_dir}"/hooks/
-		cp hooks/* "${lib_dir}"/hooks/
+		mkdir -p "${usr_dir}"/hooks/
+		cp hooks/* "${usr_dir}"/hooks/
 		;;
 
 	*)

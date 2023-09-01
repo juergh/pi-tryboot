@@ -513,7 +513,7 @@ tb_purge_all()
 # Main entry point
 #
 
-PKG_DIR=/usr/lib/rpi-tryboot
+PKG_DIR=/usr/share/rpi-tryboot
 
 BOOT_DIR=/boot
 if [ -e /boot/firmware/config.txt ] ; then

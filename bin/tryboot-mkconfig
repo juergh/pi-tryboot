@@ -37,7 +37,7 @@ while [ ${#} -ne 0 ] ; do
 done
 
 # shellcheck disable=SC1091
-. /usr/lib/rpi-tryboot/functions
+. /usr/share/rpi-tryboot/functions
 
 if [ -n "${outfile}" ] ; then
 	tb_print_config > "${outfile}"
