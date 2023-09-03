@@ -40,7 +40,7 @@ while [ ${#} -ne 0 ] ; do
 done
 
 # shellcheck disable=SC1091
-. /usr/share/rpi-tryboot/functions
+. /usr/share/pi-tryboot/functions
 
 if [ -z "${tbe}" ] ; then
 	echo "-- Clear default tryboot entry"

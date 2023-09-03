@@ -1,18 +1,18 @@
-Source: rpi-tryboot
+Source: pi-tryboot
 Section: main/misc
 Priority: optional
 Maintainer: Juerg Haefliger <juergh@proton.me>
 Build-Depends: debhelper (>= 11), rsync
 Standards-Version: 4.1.3
 
-Package: rpi-tryboot-simple
+Package: pi-tryboot-simple
 Architecture: all
 Depends: ${misc:Depends}
 Description: Raspberry Pi tryboot bootloader (simple)
  Raspberry Pi tryboot bootloader (simple)
 
-Package: rpi-tryboot
+Package: pi-tryboot
 Architecture: all
-Depends: ${misc:Depends}, rpi-tryboot-simple
+Depends: ${misc:Depends}, pi-tryboot-simple
 Description: Raspberry Pi tryboot bootloader
  Raspberry Pi tryboot bootloader

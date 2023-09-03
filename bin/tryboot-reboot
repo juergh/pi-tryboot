@@ -32,7 +32,7 @@ done
 
 
 # shellcheck disable=SC1091
-. /usr/share/rpi-tryboot/functions
+. /usr/share/pi-tryboot/functions
 
 while true; do
 	echo

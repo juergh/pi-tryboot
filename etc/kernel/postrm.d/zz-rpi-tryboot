@@ -11,7 +11,7 @@ fi
 version=${1}
 
 if [ -z "${version}" ] ; then
-	echo "W: rpi-tryboot: Missing kernel version" >&2
+	echo "W: pi-tryboot: Missing kernel version" >&2
 	exit 2
 fi
 

@@ -8,11 +8,11 @@ dest_dir=debian/${pkg_name}
 
 etc_dir="${dest_dir}"/etc
 bin_dir="${dest_dir}"/usr/bin
-usr_dir="${dest_dir}"/usr/share/rpi-tryboot
+usr_dir="${dest_dir}"/usr/share/pi-tryboot
 
 case "${pkg_name}" in
 
-	rpi-tryboot-simple)
+	pi-tryboot-simple)
 		# Install scripts
 		mkdir -p "${bin_dir}"
 		cp bin/tryboot-* "${bin_dir}"/
@@ -37,7 +37,7 @@ case "${pkg_name}" in
 		cp etc/initramfs/post-update.d/* "${etc_dir}"/initramfs/post-update.d/
 		;;
 
-	rpi-tryboot)
+	pi-tryboot)
 		# Install firmware files
 		mkdir -p "${usr_dir}"/tryboot
 		cp buildd/initrd.img "${usr_dir}"/tryboot/
