@@ -62,7 +62,7 @@ cp conf/* "${initrdd}"/conf/
 
 # Copy helper libary
 mkdir -p "${initrdd}"/scripts/
-cp bin/functions "${initrdd}"/scripts/
+cp functions "${initrdd}"/scripts/
 
 # Copy the firmware
 rsync --verbose --archive --ignore-existing --exclude '/boot/' \

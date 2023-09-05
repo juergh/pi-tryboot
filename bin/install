@@ -19,7 +19,7 @@ case "${pkg_name}" in
 
 		# Install helper library and hook scripts
 		mkdir -p "${usr_dir}"
-		cp bin/functions "${usr_dir}"/
+		cp functions "${usr_dir}"/
 
 		# Install config files
 		mkdir -p "${etc_dir}"/default/tryboot.d "${etc_dir}"/tryboot.d
