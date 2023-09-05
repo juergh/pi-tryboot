@@ -1,0 +1,51 @@
+#!/bin/bash -eu
+#
+# Query tryboot entries
+#
+
+function usage()
+{
+	cat <<EOF
+Usage: $(basename "${0}") [-h] [TBE]
+
+Query tryboot entries (TBEs).
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+tbe=
+
+while [ ${#} -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			if [ -n "${tbe}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			tbe=${1}
+			;;
+	esac
+	shift
+done
+
+# shellcheck disable=SC1091
+. /usr/share/pi-tryboot/functions
+
+if [ -z "${tbe}" ] ; then
+	tb_print_tbe_list
+	exit
+fi
+
+if ! tb_tbe_exists "${tbe}" ; then
+	echo "-- No such tryboot entry: ${tbe}"
+	tb_untrap_exit
+	exit 1
+fi
+
+echo "${tbe}"
