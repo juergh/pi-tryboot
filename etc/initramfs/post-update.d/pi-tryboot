@@ -11,4 +11,7 @@ abi="${1}"
 # ignored
 _initrd="${2}"
 
-exec tryboot-install "${abi}"
+# Only reinstall the TBE if it exists already
+if tryboot-query "${abi}" ; then
+	tryboot-install "${abi}"
+fi
