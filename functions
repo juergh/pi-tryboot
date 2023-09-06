@@ -401,15 +401,23 @@ tb_install_kernel_tbe()
 	cp "${vmlinuz}" "${tbe_dir}"/vmlinuz
 	cp "${initrd}" "${tbe_dir}"/initrd.img
 
-	# Copy the DTBS and overlays
-	for dtb_dir in /lib/firmware/"${tbe}"/device-tree \
+	# Find the DT directory
+	for dt_dir in /lib/firmware/"${tbe}"/device-tree \
 	               /usr/lib/linux-image-"${tbe}" ; do
-		if [ -d "${dtb_dir}" ] ; then
+		if [ -d "${dt_dir}" ] ; then
 			break
 		fi
 	done
-	cp "${dtb_dir}"/broadcom/bcm27* "${tbe_dir}"
-	cp -r "${dtb_dir}"/overlays "${tbe_dir}"
+
+	# Copy the DTBs
+	if [ -d "${dt_dir}"/broadcom ] ; then
+		cp "${dt_dir}"/broadcom/bcm27* "${tbe_dir}"
+	else
+		cp "${dt_dir}"/bcm27* "${tbe_dir}"
+	fi
+
+	# Copy the DT overlays
+	cp -r "${dt_dir}"/overlays "${tbe_dir}"
 
 	# Add TBE marker
 	touch "${tbe_dir}"/.tbe
