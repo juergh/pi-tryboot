@@ -48,7 +48,7 @@ tb_trap_exit()
 #
 tb_inited()
 {
-	test -d "${TB_DIR}"
+	test -e "${TB_DIR}"/.init
 }
 
 #
@@ -62,6 +62,7 @@ tb_init()
 	fi
 
 	# Create the tryboot root directory
+	rm -rf "${TB_DIR}"
 	mkdir -p "${TB_DIR}"
 
 	# Back up the original config.txt (twice, just in case)
@@ -80,6 +81,9 @@ tb_init()
 
 	# Create the tryboot.cfg config file
 	tb_create_tryboot_cfg
+
+	# Fully initialized
+	touch "${TB_DIR}"/.init
 }
 
 #
