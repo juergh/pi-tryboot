@@ -67,7 +67,9 @@ tb_init()
 
 	# Back up the original config.txt (twice, just in case)
 	cp "${FW_DIR}"/config.txt "${TB_DIR}"/
-	cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+	if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
+		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
+	fi
 
 	# Set the default commandline
 	cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
