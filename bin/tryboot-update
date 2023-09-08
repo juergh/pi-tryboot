@@ -33,6 +33,9 @@ done
 # shellcheck disable=SC1091
 . /usr/share/pi-tryboot/functions
 
+# Exit if not initialized
+tb_exit_if_not_inited
+
 echo "-- Update tryboot entries"
 tb_update_all_tbes
 

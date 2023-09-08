@@ -42,6 +42,9 @@ done
 # shellcheck disable=SC1091
 . /usr/share/pi-tryboot/functions
 
+# Exit if not initialized
+tb_exit_if_not_inited
+
 if [ -z "${tbe}" ] ; then
 	echo "-- Clear default tryboot entry"
 	tb_clear_default_tbe

@@ -34,6 +34,9 @@ done
 # shellcheck disable=SC1091
 . /usr/share/pi-tryboot/functions
 
+# Exit if not initialized
+tb_exit_if_not_inited
+
 while true; do
 	tb_print_boot_menu
 	cat <<EOF

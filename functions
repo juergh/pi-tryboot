@@ -52,6 +52,18 @@ tb_inited()
 }
 
 #
+# Exit if tryboot bootloader is not initialized
+#
+tb_exit_if_not_inited()
+{
+	if ! tb_inited ; then
+		echo "-- Tryboot bootloader is not initialized" >&2
+		tb_untrap_exit
+		exit 1
+	fi
+}
+
+#
 # Initialize tryboot bootloader
 #
 tb_init()

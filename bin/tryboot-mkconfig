@@ -39,6 +39,9 @@ done
 # shellcheck disable=SC1091
 . /usr/share/pi-tryboot/functions
 
+# Exit if not initialized
+tb_exit_if_not_inited
+
 if [ -n "${outfile}" ] ; then
 	tb_print_config > "${outfile}"
 else
