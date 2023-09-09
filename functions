@@ -370,6 +370,8 @@ tb_boot_tbe()
 
 	# Use klibc's reboot if we're running in the initrd
 	if test -d /scripts ; then
+		echo 3 > /proc/sys/vm/drop_caches
+		sync
 		/usr/lib/klibc/bin/reboot "0 tryboot"
 	else
 		reboot "0 tryboot"
