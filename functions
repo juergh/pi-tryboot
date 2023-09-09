@@ -289,6 +289,31 @@ tb_set_default_tbe()
 	cp "${TB_DIR}"/"${tbe}"/config.txt "${FW_DIR}"/config.txt
 }
 
+#
+# Check if there is enough available disk space for a TBE
+#
+tb_check_disk_space_for_tbe()
+{
+	tbe=${1}
+
+	# Calculate the available disk space in M
+	avail=$(df --block-size=1M --output=avail "${FW_DIR}" | tail -1)
+	if tb_tbe_exists "${tbe}" ; then
+		used=$(du --block-size=1M --total "${TB_DIR}"/"${tbe}" | tail -1 | \
+		       cut -f1)
+		avail=$((avail + used))
+	fi
+
+	# Calculate the required disk space in M
+	vmlinuz=${BOOT_DIR}/vmlinuz-${tbe}
+	initrd=${BOOT_DIR}/initrd.img-${tbe}
+	req=$(du --block-size=1M --total "${vmlinuz}" "${initrd}" | tail -1 | \
+	      cut -f1)
+	req=$((req + 2))  # Add some fudge for DTBs and overlays and safety
+
+	test "${avail}" -gt "${req}"
+}
+
 # ----------------------------------------------------------------------------
 # TBE boot helpers
 
