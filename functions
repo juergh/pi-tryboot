@@ -11,6 +11,10 @@ set -u
 # ----------------------------------------------------------------------------
 # TB helpers
 
+tb_error() { echo "-- E: ${*}" >&2 ; }
+tb_warn()  { echo "-- W: ${*}" >&2 ; }
+tb_info()  { echo "-- I: ${*}" ; }
+
 #
 # Exit handler
 #
@@ -21,7 +25,7 @@ tb_exit()
 	tb_untrap_exit
 
 	if [ ${rc} -ne 0 ] ; then
-		echo "-- Script failed" >&2
+		tb_error "Script failed"
 	fi
 
 	exit "${rc}"
@@ -57,7 +61,7 @@ tb_inited()
 tb_exit_if_not_inited()
 {
 	if ! tb_inited ; then
-		echo "-- Tryboot bootloader is not initialized" >&2
+		tb_error "Tryboot bootloader is not initialized"
 		tb_untrap_exit
 		exit 1
 	fi
@@ -369,7 +373,7 @@ tb_exec_boot_menu_entry()
 
 	# Call the menu entry function from tryboot.cfg
 	if ! TB_MENU_ENTRY_"${idx}" 2>/dev/null ; then
-		echo "-- Invalid index: ${idx}" >&2
+		tb_error "Invalid index: ${idx}"
 		return 1
 	fi
 
@@ -386,7 +390,7 @@ tb_boot_tbe()
 	config=${TB_DIR}/${tbe}/config.txt
 
 	if ! [ -e "${config}" ] ; then
-		echo "-- No such tryboot entry: ${tbe}" >&2
+		tb_error "No such tryboot entry: ${tbe}"
 		return 1
 	fi
 
@@ -432,7 +436,7 @@ tb_install_kernel_tbe()
 	tbe_dir=${TB_DIR}/${tbe}
 
 	if ! [ -e "${BOOT_DIR}"/vmlinuz-"${tbe}" ] ; then
-		echo "-- Invalid kernel entry: ${tbe}" >&2
+		tb_error "Invalid kernel entry: ${tbe}"
 		return 1
 	fi
 
@@ -462,7 +466,11 @@ tb_install_kernel_tbe()
 	fi
 
 	# Copy the DT overlays
-	cp -r "${dt_dir}"/overlays "${tbe_dir}"
+	if [ -d "${dt_dir}"/overlays ] ; then
+		cp -r "${dt_dir}"/overlays "${tbe_dir}"
+	else
+		tb_warn "No device-tree overlays found"
+	fi
 
 	# Add TBE marker
 	touch "${tbe_dir}"/.tbe
