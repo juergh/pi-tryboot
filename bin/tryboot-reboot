@@ -6,14 +6,19 @@
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h]
+Usage: $(basename "${0}") [-h] [TBE]
 
 Reboot into a tryboot entry (TBE).
+
+Positional arguments:
+  TBE         TBE to reboot into. If not provided, display a reboot menu.
 
 Optional arguments:
   -h, --help  Show this help text and exit.
 EOF
 }
+
+tbe=
 
 while [ ${#} -ne 0 ] ; do
 	case "${1}" in
@@ -22,11 +27,13 @@ while [ ${#} -ne 0 ] ; do
 			exit
 			;;
 		*)
-			echo "Invalid argument: ${1}" >&2
-			exit 2
+			if [ -n "${tbe}" ] ; then
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			tbe=${1}
 			;;
 	esac
-	# shellcheck disable=SC2317
 	shift
 done
 
@@ -37,6 +44,13 @@ done
 # Exit if not initialized
 tb_exit_if_not_inited
 
+# Reboot into the provided TBE
+if [ -n "${tbe}" ] ; then
+	tb_boot_tbe "${tbe}"
+	exit
+fi
+
+# Display reboot menu
 while true; do
 	tb_print_boot_menu
 	cat <<EOF
