@@ -10,4 +10,23 @@ makes use of the firmware's
 [tryboot](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#fail-safe-os-updates-tryboot)
 feature, hence its name.
 
-[Daily Ubuntu package builds](https://launchpad.net/~juergh/+archive/ubuntu/pi-tryboot)
+**Disclaimer**: This code is still experimental. Use at your own risk.
+
+**Disclaimer**: pi-tryboot is only tested on
+[Ubuntu](https://ubuntu.com/raspberry-pi) (classic).
+
+Why?
+----
+
+How?
+----
+
+Example Usage
+-------------
+
+References
+----------
+
+- [Daily Ubuntu pi-tryboot package builds](https://launchpad.net/~juergh/+archive/ubuntu/pi-tryboot)
+- [Preinstalled Ubuntu raspi images (daily)](http://cdimage.ubuntu.com/daily-preinstalled/current)
+- [Preinstalled Ubuntu raspi images (release)](https://ubuntu.com/download/raspberry-pi)
