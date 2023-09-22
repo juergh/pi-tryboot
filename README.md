@@ -37,6 +37,26 @@ boots.
 How?
 ----
 
+At boot, the Raspberry Pi firmware reads an internal register and if a
+certain bit in that register is set, it will load *tryboot.txt* instead of the
+regular *config.txt* and then clear the bit. Subsequent boots will thus fall
+back to using *config.txt*. The register content is preserved across soft
+reboots but not power cycles. To set the bit, the Pi needs to be rebooted
+with:
+
+    $ reboot '0 tryboot'
+
+This will instruct the kernel to set the bit at shutdown so that the following
+boot uses *tryboot.txt*.
+
+pi-tryboot makes use of this capability by generating a special *tryboot.txt*
+file depending on the kernel that should be rebooted into. At a high-level
+this special *tryboot.txt* is just a copy of the original *config.txt* with
+modified kernel and initrd statements.
+
+pi-tryboot provides a couple of commands (similar to GRUB) that hide all this
+complexity from the user.
+
 Example Usage
 -------------
 
