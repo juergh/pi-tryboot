@@ -10,7 +10,7 @@ clean:
 	rm -rf buildd
 
 build-indep:
-	bin/create-initrd
+#	bin/create-initrd
 
 install-indep:
 
@@ -20,7 +20,7 @@ install-indep:
 
 	# Install the tryboot files
 	bin/install pi-tryboot-simple
-	bin/install pi-tryboot
+#	bin/install pi-tryboot
 
 	dh_installchangelogs
 	dh_installdocs
