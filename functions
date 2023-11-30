@@ -91,8 +91,8 @@ tb_init()
 	cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
 	sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
 
-	# Install the highest kernel and make it the default
-	tbe=$(tb_print_highest_kernel)
+	# Install the running kernel and make it the default
+	tbe=$(uname -r)
 	tb_install_tbe "${tbe}"
 	tb_update_tbe "${tbe}"
 	tb_set_default_tbe "${tbe}"
@@ -102,14 +102,6 @@ tb_init()
 
 	# Fully initialized
 	touch "${TB_DIR}"/.init
-}
-
-#
-# Print the highest installed kernel version
-#
-tb_print_highest_kernel()
-{
-	find "${BOOT_DIR}"/vmlinuz-* | sort -Vr | head -1 | sed 's,.*/vmlinuz-,,'
 }
 
 #
