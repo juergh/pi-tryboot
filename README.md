@@ -42,7 +42,7 @@ back to using *config.txt*. The register content is preserved across soft
 reboots but not power cycles. To set the bit, the Pi needs to be rebooted
 with:
 
-    $ reboot '0 tryboot'
+    $ sudo reboot '0 tryboot'
 
 This will instruct the kernel to set the bit at shutdown so that the following
 boot uses *tryboot.txt*.
@@ -54,6 +54,21 @@ modified kernel and initrd statements.
 
 pi-tryboot provides a couple of commands (similar to GRUB) that hide all this
 complexity from the user.
+
+Installation
+------------
+
+Add the PPA that contains the daily builds and install the package:
+
+    $ sudo add-apt-repository ppa:juergh/pi-tryboot
+    $ sudo apt install pi-tryboot
+    ...
+    Unpacking pi-tryboot (1.0+202309250556~ubuntu23.10.1) ...
+    Setting up pi-tryboot-simple (1.0+202309250556~ubuntu23.10.1) ...
+    -- Initialize tryboot bootloader
+    -- Update tryboot entries
+    -- Generate tryboot.cfg
+    Setting up pi-tryboot (1.0+202309250556~ubuntu23.10.1) ...
 
 Example Usage
 -------------
