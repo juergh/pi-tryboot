@@ -6,14 +6,12 @@
 function usage()
 {
 	cat <<EOF
-Usage: $(basename "${0}") [-h] [-r] [TBE]
+Usage: $(basename "${0}") [-h] [-r] TBE
 
 Set the default tryboot entry (TBE).
 
 Positional arguments:
-  TBE         Tryboot entry name. If not provided, clears the default TBE
-              which means that the first entry of the boot menu is the
-              default.
+  TBE         Tryboot entry name.
 
 Optional arguments:
   -h, --help  Show this help text and exit.
@@ -38,6 +36,11 @@ while [ ${#} -ne 0 ] ; do
 	esac
 	shift
 done
+
+if [ -z "${tbe}" ] ; then
+	usage
+	exit 2
+fi
 
 # shellcheck disable=SC1091
 . /usr/share/pi-tryboot/functions
