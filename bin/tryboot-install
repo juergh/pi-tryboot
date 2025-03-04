@@ -68,10 +68,10 @@ fi
 
 if [ ${remove} -eq 1 ] ; then
 	if tb_tbe_exists "${tbe}" ; then
-	   echo "-- Remove tryboot entry: ${tbe}"
-	   tb_remove_tbe "${tbe}"
-	   tryboot-update
-	   exit
+		echo "-- Remove tryboot entry: ${tbe}"
+		tb_remove_tbe "${tbe}"
+		tryboot-update
+		exit
 	fi
 	echo "-- No such tryboot entry: ${tbe}" >&2
 	tb_untrap_exit
