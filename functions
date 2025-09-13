@@ -81,19 +81,21 @@ tb_init()
 	rm -rf "${TB_DIR}"
 	mkdir -p "${TB_DIR}"
 
-	# Back up the original config.txt (twice, just in case)
-	cp "${FW_DIR}"/config.txt "${TB_DIR}"/
+	# Back up the original config.txt and autoboot.txt
 	if ! [ -e "${FW_DIR}"/config.orig.txt ] ; then
 		cp "${FW_DIR}"/config.txt "${FW_DIR}"/config.orig.txt
 	fi
+	if [ -e "${FW_DIR}"/autoboot.txt ] ; then
+		mv "${FW_DIR}"/autoboot.txt "${FW_DIR}"/autoboot.orig.txt
+	fi
 
 	# Set the default commandline
-	if [ -e "${FW_DIR}"/cmdline.txt ] ; then
-		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
-	else
-		# Starting with Questing, there is no now current/new for
+	if [ -e "${FW_DIR}"/current/cmdline.txt ] ; then
+		# Starting with Questing, there is now current/new for
 		# A/B boots
 		cmdline=$(head -1 "${FW_DIR}"/current/cmdline.txt)
+	else
+		cmdline=$(head -1 "${FW_DIR}"/cmdline.txt)
 	fi
 	sed -i "s/__CMDLINE__/${cmdline}/" /etc/default/tryboot
 
@@ -564,6 +566,9 @@ tb_remove_tbe()
 tb_purge_all()
 {
 	mv "${FW_DIR}"/config.orig.txt "${FW_DIR}"/config.txt
+	if [ -e "${FW_DIR}"/autoboot.orig.txt ] ; then
+		mv "${FW_DIR}"/autoboot.orig.txt "${FW_DIR}"/autoboot.txt
+	fi
 	rm -f "${FW_DIR}"/tryboot.txt
 	rm -rf "${TB_DIR}"
 }
