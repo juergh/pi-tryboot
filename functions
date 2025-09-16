@@ -89,6 +89,9 @@ tb_init()
 		mv "${FW_DIR}"/autoboot.txt "${FW_DIR}"/autoboot.orig.txt
 	fi
 
+	# Copy the current config to be included as the base config
+	cp "${FW_DIR}"/config.txt "${TB_DIR}"/
+
 	# Set the default commandline
 	if [ -e "${FW_DIR}"/current/cmdline.txt ] ; then
 		# Starting with Questing, there is now current/new for
