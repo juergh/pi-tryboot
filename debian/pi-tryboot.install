@@ -1,0 +1,6 @@
+# scripts and helper library
+bin/tryboot-* usr/bin/
+functions usr/share/pi-tryboot/
+
+# config files
+etc/* etc/
