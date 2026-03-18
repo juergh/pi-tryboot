@@ -26,6 +26,10 @@ case "${pkg_name}" in
 		cp etc/tryboot "${etc_dir}"/default/
 		cp etc/tryboot.d/* "${etc_dir}"/tryboot.d/
 
+		# Disable flash-kernel
+		mkdir -p "${etc_dir}"/flash-kernel
+		cp etc/flash-kernel/machine "${etc_dir}"/flash-kernel
+
 		# Install kernel postinst and postrm hooks
 		for d in postinst.d postrm.d ; do
 			mkdir -p "${etc_dir}"/kernel/"${d}"
