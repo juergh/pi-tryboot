@@ -19,8 +19,7 @@ install-indep:
 	dh_prep
 
 	# Install the tryboot files
-	bin/install pi-tryboot-simple
-#	bin/install pi-tryboot
+	bin/install pi-tryboot
 
 	dh_installchangelogs
 	dh_installdocs

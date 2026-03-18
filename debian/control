@@ -7,14 +7,8 @@ Standards-Version: 4.1.3
 Vcs-Git: https://github.com/juergh/pi-tryboot
 Rules-Requires-Root: no
 
-Package: pi-tryboot-simple
-Architecture: all
-Depends: ${misc:Depends}
-Description: Raspberry Pi tryboot bootloader (simple)
- Raspberry Pi tryboot bootloader (simple)
-
 Package: pi-tryboot
 Architecture: all
-Depends: ${misc:Depends}, pi-tryboot-simple
+Depends: ${misc:Depends}
 Description: Raspberry Pi tryboot bootloader
  Raspberry Pi tryboot bootloader

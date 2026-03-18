@@ -12,7 +12,7 @@ usr_dir="${dest_dir}"/usr/share/pi-tryboot
 
 case "${pkg_name}" in
 
-	pi-tryboot-simple)
+	pi-tryboot)
 		# Install scripts
 		mkdir -p "${bin_dir}"
 		cp bin/tryboot-* "${bin_dir}"/
@@ -39,18 +39,6 @@ case "${pkg_name}" in
 		# Install initramfs post-update hook
 		mkdir -p "${etc_dir}"/initramfs/post-update.d
 		cp etc/initramfs/post-update.d/* "${etc_dir}"/initramfs/post-update.d/
-		;;
-
-	pi-tryboot)
-		# Install firmware files
-		mkdir -p "${usr_dir}"/tryboot
-		cp buildd/initrd.img "${usr_dir}"/tryboot/
-		cp -r firmware/boot/firmware/* "${usr_dir}"/tryboot/
-		find "${usr_dir}"/tryboot -type f -exec chmod 644 {} +
-
-		# Install hook scripts
-		mkdir -p "${usr_dir}"/hooks/
-		cp hooks/* "${usr_dir}"/hooks/
 		;;
 
 	*)
