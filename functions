@@ -581,6 +581,13 @@ tb_purge_all()
 	fi
 	rm -f "${FW_DIR}"/tryboot.txt
 	rm -rf "${TB_DIR}"
+
+	# Enable flash-kernel-piboot A/B services
+	for service in piboot-try-reboot piboot-try-validate ; do
+		if ! systemctl is-enabled "${service}" &>/dev/null ; then
+			sudo systemctl enable --now "${service}"
+		fi
+	done
 }
 
 # ----------------------------------------------------------------------------
