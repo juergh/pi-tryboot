@@ -1,13 +1,10 @@
 #!/bin/sh
 
-# FIXE: Disable for now
-exit 0
-
 set -e
 
 case "$1" in
 	remove)
-		tryboot-install -r tryboot
+		tryboot-install --purge
 		;;
 esac
 
